@@ -1,3 +1,7 @@
+#ifndef	__HAL_H__
+#define	__HAL_H__
+
+
 #include <stdio.h>
 
 
@@ -70,5 +74,5 @@
 
 
 
-
+#endif	//__HAL_H__
 
