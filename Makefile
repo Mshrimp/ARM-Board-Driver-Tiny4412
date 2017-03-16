@@ -6,6 +6,10 @@ DRIVER_NAME = MY_Driver
 PWD = ${shell pwd}
 
 DRIVER_RELAY += ./driver.o
+DRIVER_RELAY += cta/test.o
+
+
+CC = arm-hisiv100nptl-linux-gcc
 
 obj-m := $(DRIVER_NAME).o
 $(DRIVER_NAME)-objs := $(DRIVER_RELAY)
@@ -13,7 +17,7 @@ $(DRIVER_NAME)-objs := $(DRIVER_RELAY)
 all:
 	#make -C $(KERNEL_DIR) M=`pwd` modules
 	make -C $(KERNEL_DIR) M=${PWD} modules
-	arm-hisiv100nptl-linux-gcc app_led.c -o app
+	$(CC) app_led.c -o app
 	@cp $(DRIVER_NAME).ko app /mnt/nfs/mcy/target/ -rf
 	@mkdir ./build
 	@mv *.o *mod.c *.order Module* build/
@@ -24,7 +28,7 @@ clean:
 	@rm app *.ko -rf
 
 app:
-	arm-hisiv100nptl-linux-gcc app_led.c -o app
+	$(CC) app_led.c -o app
 	#gcc app_led.c -o app_pc
 
 

@@ -14,8 +14,6 @@ typedef	struct	{
 #define	PIN_OUTPUT_HIGH	0x01
 	void (*SetExport)(void *PinInfo, uint8	HighLow);
 	void (*GetPinValue)(void *PinInfo);
-
-
 }ClassPin;
 
 
