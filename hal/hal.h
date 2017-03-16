@@ -2,13 +2,6 @@
 #define	__HAL_H__
 
 
-#include <stdio.h>
-
-
-
-
-
-
 
 #define	GPIO1_BASE_ADDR	0x11400000
 
@@ -62,6 +55,7 @@
 
 
 	
+//====================================================
 #define	GPM4CON_ADDR	(GPIO2_BASE_ADDR + GPM4_OFFSET + GPIO_CON_OFFSET)
 #define	GPM4DAT_ADDR	(GPIO2_BASE_ADDR + GPM4_OFFSET + GPIO_DAT_OFFSET)
 #define	GPM4PUD_ADDR	(GPIO2_BASE_ADDR + GPM4_OFFSET + GPIO_PUD_OFFSET)
@@ -69,8 +63,91 @@
 #define	GPM4CONPDN_ADDR	(GPIO2_BASE_ADDR + GPM4_OFFSET + GPIO_CONPDN_OFFSET)
 #define	GPM4PUDPDN_ADDR	(GPIO2_BASE_ADDR + GPM4_OFFSET + GPIO_PUDPDN_OFFSET)
 
+//====================================================
+typedef struct {
+	uint32	CON;
+	uint32	DAT;
+	uint32	PUD;
+	uint32	DRV;
+	uint32	CONPDN;
+	uint32	PUDPDN;
+}sGPIO;
+
+#define	GPM4	(sGPIO *)(GPIO2_BASE_ADDR + GPM4_OFFSET)
+
+//====================================================
 
 
+
+
+
+static void GpioSetPinDirection(sGPIO *spGPIO, uint32 bit, uint8 InOut)
+{
+	uint32	val;
+
+	val = readl(spGPIO->CON);
+	if (InOut & PIN_DIR_INPUT) {
+		val &= ~(0x0F << (bit*4));
+	} else if (InOut & PIN_DIR_OUTPUT) {
+		val &= ~(0x0F << (bit*4));
+		val |= 0x01 << (bit*4);
+	}
+	writel(val, spGPIO->CON);
+}
+
+static void GpioSetPinDirection_Addr(uint32 addr, uint32 bit, uint8 InOut)
+{
+	uint32	val;
+
+	val = readl(addr);
+	if (InOut & PIN_DIR_INPUT) {
+		val &= ~(0x0F << (bit*4));
+	} else if (InOut & PIN_DIR_OUTPUT) {
+		val &= ~(0x0F << (bit*4));
+		val |= 0x01 << (bit*4);
+	}
+	writel(val, addr);
+}
+
+static void GpioSetPinExport(sGPIO *spGPIO, uint32 bit, uint8 HighLow)
+{
+	uint32 val;
+	val = readl(spGPIO->DAT);
+	if (HighLow & PIN_OUTPUT_LOW) {
+		val &= ~(0x01 << bit);
+	} else {
+		val |= 0x01 << bit;
+	}
+	writel(val, spGPIO->DAT);
+}
+
+static void GpioSetPinExport_Addr(uint32 addr, uint32 bit, uint8 HighLow)
+{
+	uint32 val;
+	val = readl(addr);
+	if (HighLow & PIN_OUTPUT_LOW) {
+		val &= ~(0x01 << bit);
+	} else {
+		val |= 0x01 << bit;
+	}
+	writel(val, addr);
+}
+
+static int32 GpioGetPinValue(sGPIO *spGPIO, uint32 bit)
+{
+	uint32 val;	
+	val = readl(spGPIO->DAT);
+
+	return (val & (0x01 << bit)) ? 1 : 0;
+}
+
+static int32 GpioGetPinValue_Addr(uint32 addr, uint32 bit)
+{
+	uint32 val;	
+	val = readl(addr);
+
+	return (val & (0x01 << bit)) ? 1 : 0;
+}
 
 
 
