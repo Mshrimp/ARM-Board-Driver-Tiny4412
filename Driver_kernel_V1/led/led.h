@@ -19,7 +19,7 @@
 
 #define	DEV_NAME			"test_dev_led"
 
-#define LED_CTRL_TYPE		0x01
+#define LED_CTRL_TYPE		"L"
 
 #define LED_OFF				_IO(LED_CTRL_TYPE, 0)
 #define	LED_ON				_IO(LED_CTRL_TYPE, 1)
