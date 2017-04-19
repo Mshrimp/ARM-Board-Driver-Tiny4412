@@ -1,8 +1,9 @@
-obj-m += led.o
+obj-m += key.o
 
 #KERNEL_DIR := /lib/modules/$(shell uname -r)/build
 #KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
-KERNEL_DIR := /home/kevin/kernel/linux-3.5
+KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
+#KERNEL_DIR := /home/kevin/kernel/linux-3.5
 #ROOTFS	:= /home/$(USER)/nfsroot
 ROOTFS	:= /nfs_mini
 TARGET_DIR := /nfs_mini/mcy
