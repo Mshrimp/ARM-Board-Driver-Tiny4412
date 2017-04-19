@@ -11,13 +11,13 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long size)
 ssize_t led_test_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
 	printk("led test write!\n");
-	return 0;
+	return size;
 }
 
 ssize_t led_test_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
 {
 	printk("led test read!\n");
-	return 0;
+	return size;
 }
 
 int led_test_open (struct inode *inodep, struct file *filp)
@@ -33,6 +33,7 @@ int led_test_close (struct inode *inodep, struct file *filp)
 }
 
 struct file_operations fops = {
+	.owner = THIS_MODULE,
 	.open = led_test_open,
 	.release = led_test_close,
 	.read = led_test_read,

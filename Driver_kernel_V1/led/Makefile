@@ -2,7 +2,8 @@ obj-m += led.o
 
 #KERNEL_DIR := /lib/modules/$(shell uname -r)/build
 #KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
-KERNEL_DIR := /home/kevin/kernel/linux-3.5
+KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
+#KERNEL_DIR := /home/kevin/kernel/linux-3.5
 #ROOTFS	:= /home/$(USER)/nfsroot
 ROOTFS	:= /nfs_mini
 TARGET_DIR := /nfs_mini/mcy
@@ -16,12 +17,14 @@ all:
 	make -C $(KERNEL_DIR) M=`pwd` modules
 	@#mkdir target
 	@#mv *.mod.* *.o *.o* *.sym* target -f
-
+	arm-linux-gcc app.c -o app
+	
 
 clean:
 	make -C $(KERNEL_DIR) M=`pwd` clean
 	@#rm target -rf
 	@#rm *.ko
+	rm app -rf
 
 app:
 	arm-linux-gcc app.c -o app
