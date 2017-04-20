@@ -18,8 +18,7 @@
 
 #define	LISTEN_NUM	10
 #define	PORT		8888
-#define SER_IP		"192.169.0.109"
-
+#define SER_IP		"192.168.0.110"
 
 int main(int argc, char *argv[])
 {
@@ -54,31 +53,9 @@ int main(int argc, char *argv[])
 	
 	printf("Client: connect success!\n");
 
-	/********************* accept **********************/
-/*
-	int fd = -1;
-	int accept_len = sizeof(Client_addr);
-	while(1)
-	{
-		fd = accept(Socketfd, (struct sockaddr *)&Client_addr, &accept_len);
-		if (fd < 0)
-		{
-			printf("Client: accept failed!\n");
-			close(Socketfd);
-			return -1;
-		}
-
-		memset(buf, 0, sizeof(buf));
-		read(fd, buf, sizeof(buf));
-		printf("Client: fd = %d, buf = %s\n", fd, buf);
-		printf("Client: ip: %s, port: %d\n", inet_ntoa(Client_addr.sin_addr), ntohs(Client_addr.sin_port));
-	}
-*/
-
-	//write(Socketfd, "Hello unix network!", 20);
 	write(Socketfd, buf, strlen(buf)+1);
 	printf("Client: buf = %s\n", buf);
-	printf("Client: ip: %s, port: %d\n", inet_ntoa(Client_addr.sin_addr), ntohs(Client_addr.sin_port));
+	printf("Client: port: %d\n", ntohs(Client_addr.sin_port));
 
 	close(Socketfd);
 
