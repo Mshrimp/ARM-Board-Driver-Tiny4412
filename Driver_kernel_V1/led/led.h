@@ -17,9 +17,18 @@
 #define	GPM4DAT_ADDR			(GPM4_BASE+GPM4DAT_OFFSET)
 
 
+
+/************************************************************/
+
+#define	LED_CON_ADDR			GPM4CON_ADDR
+#define	LED_DAT_ADDR			GPM4DAT_ADDR
+
+
 #define	DEV_NAME				"test_dev_led"
 
 #define LED_CTRL_TYPE			"L"
+
+#define	LED_TOTLE_NUM			4
 
 #define LED_ALL_OFF				_IO(LED_CTRL_TYPE, 0)
 #define	LED_ALL_ON				_IO(LED_CTRL_TYPE, 1)

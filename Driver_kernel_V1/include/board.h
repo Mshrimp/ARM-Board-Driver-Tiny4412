@@ -4,16 +4,13 @@
 
 #include <asm/io.h>
 
-#define	readb(a)		__raw_readb(a)
-#define	readw(a)		__raw_readw(a)	
-#define	readl(a)		__raw_readl(a)	
+#define	hal_readb(reg)		__raw_readb(reg)
+#define	hal_readw(reg)		__raw_readw(reg)
+#define	hal_readl(reg)		__raw_readl(reg)
 
-#define	writeb(v,a)		__raw_writeb(v, a)	
-#define	writew(v,a)		__raw_writew(v, a)	
-#define	writel(v,a)		__raw_writel(v, a)	
-
-#define	hal_writel(val, reg)		writel(val, reg)
-#define	hal_readl(reg)				readl(reg)
+#define	hal_writeb(val, reg)		__raw_writeb(val, reg)
+#define	hal_writew(val, reg)		__raw_writew(val, reg)
+#define	hal_writel(val, reg)		__raw_writel(val, reg)
 
 
 
@@ -53,12 +50,12 @@
 			(hal_writel())
 
 #else
-void set_bit(unsigned int reg, unsigned int bit)
+void hal_set_bit(unsigned int reg, unsigned int bit)
 {
 	hal_writel((hal_readl(reg) | (0x01 << bit)), reg);
 }
 
-void clear_bit(unsigned int reg, unsigned int bit)
+void hal_clear_bit(unsigned int reg, unsigned int bit)
 {
 	hal_writel((hal_readl(reg) & ~(0x01 << bit)), reg);
 }
@@ -66,9 +63,9 @@ void clear_bit(unsigned int reg, unsigned int bit)
 void set_bit_val(unsigned int reg, unsigned int bit, unsigned val)
 {
 	if (val == 0) {
-		clear_bit(reg, bit);	
+		hal_clear_bit(reg, bit);	
 	} else {
-		set_bit(reg, bit);
+		hal_set_bit(reg, bit);
 	}
 }
 
@@ -79,12 +76,12 @@ int get_bit_val(unsigned int reg, unsigned int bit)
 
 void set_nbits_val(unsigned int reg, unsigned int bit, unsigned int num, unsigned val)
 {
-	hal_writel(hal_readl(reg) & ~(((0x01<<num)-1)<<bit) | (val&(0x01<<num)-1)<<bit, reg);
+	hal_writel(((hal_readl(reg) & (~(((0x01<<num)-1)<<bit))) | ((val&((0x01<<num)-1))<<bit)), reg);
 }
 
 int get_nbits_val(unsigned int reg, unsigned int bit, unsigned int num)
 {
-	return ((hal_readl(reg)>>bit) & ((0x01<<num)-1))
+	return ((hal_readl(reg)>>bit) & ((0x01<<num)-1));
 }
 
 void set_reg_val(unsigned int reg, unsigned val)
