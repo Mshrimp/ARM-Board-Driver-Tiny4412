@@ -1,46 +1,6 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 
-#include "../include/board.h"
-#include "led.h"
-
-
-void led_all_off(void)
-{
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, (0x01<<LED_TOTLE_NUM)-1);	// Set all GPIO output high
-}
-
-void led_all_on(void)
-{
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, 0x0);	// Set all GPIO output low
-}
-
-
-void led_on(unsigned int num)
-{
-	set_bit_val(LED_DAT_ADDR, num, 0);		// Set GPIO output low, LED ON
-}
-
-
-void led_off(unsigned int num)
-{
-	set_bit_val(LED_DAT_ADDR, num, 1);		// Set GPIO output high, LED OFF
-}
-
-void led_init(void)
-{
-	int i = 0;
-
-	for (i = 0; i < LED_TOTLE_NUM; i++)
-	{
-		set_nbits_val(LED_CON_ADDR, i*4, 4, 0x01);	// Set GPIO to output
-	}
-
-	led_all_off();
-}
-
-
-
 
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long size)
 {
