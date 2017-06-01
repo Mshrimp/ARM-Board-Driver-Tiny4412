@@ -1,9 +1,22 @@
-.text
-.globl _start
+
+	.section	.text
+	.align	2
+	.global	_start
 _start:
-	ldr sp, =0x02027800
+	stmfd sp!, {lr}
+	
+	mrs r0, cpsr
+	bic r0, r0, #0x1f
+	orr r0, r0, #0x11
+	msr cpsr, r0
 
-	bl main
+	mrs r0, cpsr
+	bic r0, r0, #0x1f
+	orr r0, r0, #0x13
+	msr cpsr, r0
 
-halt_loop:
-	b halt_loop
+	bl	main
+
+	ldmfd sp!, {pc}
+	
+

@@ -28,9 +28,8 @@ void led_off(int bit)
 	GPM4DAT |= (1 << bit);
 }
 
-int main(void)
+unsigned int get_led_status(void)
 {
-	led_on_all();
-
-	return 0;
+	return (GPM4DAT & 0x0F);
 }
+

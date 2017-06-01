@@ -8,6 +8,7 @@ void led_on_all(void);
 void led_off_all(void);
 void led_on(int bit);
 void led_off(int bit);
+unsigned int get_led_status(void);
 
 #endif /* __LED_H__ */
 
