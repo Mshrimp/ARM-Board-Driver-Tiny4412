@@ -1,3 +1,7 @@
+ENTRY(_start);
+OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm");
+OUTPUT_ARCH(arm);
+
 
 SECTIONS
 {
@@ -17,7 +21,9 @@ SECTIONS
 	}
 
 	. = ALIGN(4);
+	__bss_start = .;
 	.bss : {
 		*(.bss);
 	}
+	__bss_end = .;
 }
