@@ -3,8 +3,14 @@
 
 #include "board.h"
 
-#define	GPM4CON		0x1100
-#define	GPM4DAT		0x1101
+#define	GPIO_BASE			0x11000000
+
+#define	GPM4CON_OFFSET		0x02E0
+#define	GPM4DAT_OFFSET		0x02E4
+
+#define	GPM4CON				(*(vuint32 *)(GPIO_BASE + GPM4CON_OFFSET))
+#define	GPM4DAT				(*(vuint32 *)(GPIO_BASE + GPM4DAT_OFFSET))
+
 
 
 int led_config_n(int n);
@@ -17,4 +23,4 @@ void led_set_val(uint32 val);
 uint32 led_get_val(void);
 
 
-#endif	/* __BOARD_H__ */
+#endif	/* __LED_H__ */

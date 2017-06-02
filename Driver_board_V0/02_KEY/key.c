@@ -1,6 +1,6 @@
-#include "led.h"
+#include "key.h"
 
-#define	LED_TOTLE_NUM	4
+#define	KEY_TOTLE_NUM	4
 
 int led_config_n(int n)
 {
@@ -22,7 +22,6 @@ void led_config(void)
 	}
 }
 
-
 void led_on_all(void)
 {
 	
@@ -34,7 +33,6 @@ void led_off_all(void)
 	
 	set_nbit_val(GPM4DAT, 0, LED_TOTLE_NUM, 0xF);
 }
-
 
 void led_on(int n)
 {

@@ -1,0 +1,51 @@
+
+============================================ LED
+LED
+
+LED1	-->	GPM4_0
+LED2	-->	GPM4_1
+LED3	-->	GPM4_2
+LED4	-->	GPM4_3
+低电平触发
+
+
+BASE	0x1100_0000
+
+GPM4CON		0x110002E0
+	GPM4_0	[3:0]
+	GPM4_1	[7:4]
+	GPM4_2	[11:8]
+	GPM4_3	[15:12]
+		0x0		Input
+		0x1		Output
+
+GPM4DAT		0x110002E4
+	GPM4_0	--	GPM4_3	[0:3]
+		0x0		Low
+		0x1		High
+
+============================================ KEY
+KEY
+
+KEY1	-->	XEINT26		-->	GPX3_2
+KEY2	-->	XEINT27		-->	GPX3_3
+KEY3	-->	XEINT28		-->	GPX3_4
+KEY4	-->	XEINT29		-->	GPX3_5
+默认高电平，低电平触发
+
+
+BASE	0x1100_0000
+
+GPX3CON		0x1100_0C60
+	GPM3_2	[11:8]
+	GPM3_3	[15:12]
+	GPM3_4	[19:16]
+	GPM3_5	[23:20]
+		0x0		Input
+		0x1		Output
+
+GPM4DAT		0x1100_0C64
+	GPX3_2	--	GPX3_5	[2:5]
+		0x0		Low
+		0x1		High
+
