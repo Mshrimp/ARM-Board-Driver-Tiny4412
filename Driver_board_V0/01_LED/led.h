@@ -12,14 +12,16 @@
 #define	GPM4DAT				(*(vuint32 *)(GPIO_BASE + GPM4DAT_OFFSET))
 
 
+#define	LED_TOTLE_NUM		4
 
-int led_config_n(int n);
+void led_config_n(int n);
 void led_config(void);
 void led_on_all(void);
 void led_off_all(void);
 void led_on(int n);
 void led_off(int n);
 void led_set_val(uint32 val);
+uchar8 led_get_bit(int n);
 uint32 led_get_val(void);
 
 

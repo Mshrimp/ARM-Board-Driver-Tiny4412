@@ -2,14 +2,11 @@
 
 #define	LED_TOTLE_NUM	4
 
-int led_config_n(int n)
+void led_config_n(int n)
 {
 	if (n < LED_TOTLE_NUM) {
 		// Config CPM4_0 ~ GPM4_3 as output
 		set_nbit_val(GPM4CON, 4*n, 4, 0x01);
-		return 0;
-	} else {
-		return -1;
 	}
 }
 
@@ -49,8 +46,13 @@ void led_set_val(uint32 val)
 	set_nbit_val(GPM4DAT, 0, LED_TOTLE_NUM, val);
 }
 
+uchar8 led_get_bit(int n)
+{
+	return get_bit(GPM4DAT, n);
+}
+
 uint32	led_get_val(void)
 {
-	get_nbit(GPM4DAT, 0, 4);
+	return get_nbit(GPM4DAT, 0, 4);
 }
 
