@@ -5,6 +5,8 @@
 *.elf
 *.dis
 target
+start
+*.bin
 
 # Precompiled Headers
 *.gch
