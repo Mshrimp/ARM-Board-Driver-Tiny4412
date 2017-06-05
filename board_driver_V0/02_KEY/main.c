@@ -3,7 +3,7 @@
 
 int main(void)
 {
-	led_on_all();
+	key_config();
 	return 0;
 }
 
