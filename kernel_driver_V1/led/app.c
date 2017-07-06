@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 
 
+#define	LED_Device_PATH		/dev/led
+
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2)
@@ -30,8 +33,10 @@ int main(int argc, char *argv[])
 	ret = write(fd, "hello", 3);
 	printf("write: ret = %d\n", ret);
 
-	ret = read(fd, NULL, 5);
-	printf("read: ret = %d\n", ret);
+    /*
+	 *ret = read(fd, NULL, 5);
+	 *printf("read: ret = %d\n", ret);
+     */
 
 
 	return 0;

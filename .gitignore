@@ -35,3 +35,11 @@ start
 # Debug files
 *.dSYM/
 *.su
+
+#
+app
+*.mod.c
+*.order
+*.symvers
+*.cmd
+*_versions
