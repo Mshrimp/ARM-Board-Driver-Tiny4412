@@ -37,6 +37,7 @@ start
 *.su
 
 #
+tags
 app
 *.mod.c
 *.order

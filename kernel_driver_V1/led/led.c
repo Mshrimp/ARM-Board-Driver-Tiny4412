@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 
 #include "../include/board.h"
+#include "head.h"
 #include "led.h"
 
 
@@ -42,9 +43,73 @@ void led_init(void)
 
 
 
-long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long size)
+long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
+	int ret = -1;
+	unsigned int ioarg;
+
 	printk("led test ioctl!\n");
+
+	if (_IOC_TYPE(cmd) != LED_IOC_TYPE)
+		return	-EINVAL;
+
+	if (_IOC_NR(cmd) > LED_IOC_MAX_NR)
+		return	-EINVAL;
+
+/*
+ *    if (_IOC_DIR(cmd) & _IOC_READ) {
+ *        ret = access_ok(VERIFY_WRITE, (void *)args, _IOC_SIZE(cmd));
+ *    } else {
+ *        ret = access_ok(VERIFY_READ, (void *)args, _IOC_SIZE(cmd));
+ *    }
+ */
+
+	switch(cmd)
+	{
+		case	LED_ALL_OFF:
+			printk("ioctl: All LED Off\n");
+			break;
+		case	LED_ALL_ON:
+			printk("ioctl: All LED On\n");
+			break;
+		case	LED1_OFF:
+			printk("ioctl: LED1 Off\n");
+			break;
+		case	LED1_ON:
+			printk("ioctl: LED1 On\n");
+			break;
+		case	LED2_OFF:
+			printk("ioctl: LED2 Off\n");
+			break;
+		case	LED2_ON:
+			printk("ioctl: LED2 On\n");
+			break;
+		case	LED3_OFF:
+			printk("ioctl: LED3 Off\n");
+			break;
+		case	LED3_ON:
+			printk("ioctl: LED3 On\n");
+			break;
+		case	LED4_OFF:
+			printk("ioctl: LED4 Off\n");
+			break;
+		case	LED4_ON:
+			printk("ioctl: LED4 On\n");
+			break;
+		case	LED_IOC_GET_DATA:
+			printk("ioctl: LED get data\n");
+			ioarg = 0x01;
+			ret = __put_user(ioarg, (int *)arg);
+			break;
+		case	LED_IOC_SET_DATA:
+			printk("ioctl: LED set data\n");
+			ret = __get_user(ioarg, (int *)arg);
+			printk("ioctl: LED set data, ioarg = %u\n", ioarg);
+			break;
+
+		default:
+			return	-EINVAL;
+	}
 	return 0;
 }
 
