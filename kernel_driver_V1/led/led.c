@@ -45,15 +45,40 @@ unsigned int led_all_status_get(void)
 	return get_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM);
 }
 
-void led_all_status_set(unsigned int led_status)
+void led_all_status_set(unsigned int LedStatus)
 {
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, led_status);
+	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, LedStatus);
+}
+
+void led_set_blink(int BlinkData)
+{
+
+}
+
+void led_set_run_lamp_positive(int RunLampData)
+{
+	int i = 0;
+
+	for (i = 0; i < LED_TOTLE_NUM * 100; i++)
+	{
+		led_on(i%4);
+		delay();
+		led_off(i%4);
+		delay();
+	}
+}
+
+void led_set_run_lamp_negative(int RunLampData)
+{
+
 }
 
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret = -1;
-	unsigned int ioarg;
+	unsigned int LedStatus = 0;
+	int LedBlinkData = 0;
+	int LedRunLampData = 0;
 
 	printk("led test ioctl!\n");
 
@@ -119,16 +144,32 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 			printk("ioctl: LED4 On\n");
 			led_on(3);
 			break;
-		case	LED_IOC_GET_DATA:
-			printk("ioctl: LED get data\n");
-			ioarg = led_all_status_get();
-			ret = __put_user(ioarg, (int *)arg);
+		case	LED_IOC_GET_STATUS:
+			printk("ioctl: LED get status\n");
+			LedStatus = led_all_status_get();
+			ret = __put_user(LedStatus, (int *)arg);
 			break;
-		case	LED_IOC_SET_DATA:
-			printk("ioctl: LED set data\n");
-			ret = __get_user(ioarg, (int *)arg);
-			led_all_status_set(ioarg);
-			printk("ioctl: LED set data, ioarg = %u\n", ioarg);
+		case	LED_IOC_SET_STATUS:
+			printk("ioctl: LED set status\n");
+			ret = __get_user(LedStatus, (int *)arg);
+			led_all_status_set(LedStatus);
+			printk("ioctl: LED set status, LedStatus = %u\n", LedStatus);
+			break;
+		case	LED_IOC_SET_BLINK_DATA:
+			printk("ioctl: LED set blink data\n");
+			ret = __get_user(LedBlinkData, (int *)arg);
+			break;
+		case	LED_IOC_GET_BLINK_DATA:
+			printk("ioctl: LED get blink data\n");
+			ret = __put_user(LedBlinkData, (int *)arg);
+			break;
+		case	LED_IOC_SET_RUN_LAMP_POS:
+			printk("ioctl: LED set RunLamp positive data\n");
+			ret = __get_user(LedRunLampData, (int *)arg);
+			break;
+		case	LED_IOC_SET_RUN_LAMP_NEG:
+			printk("ioctl: LED set RunLamp negative data\n");
+			ret = __get_user(LedRunLampData, (int *)arg);
 			break;
 
 		default:

@@ -40,10 +40,16 @@
 #define LED4_OFF				_IO(LED_IOC_TYPE, 8)
 #define LED4_ON					_IO(LED_IOC_TYPE, 9)
 
-#define	LED_IOC_GET_DATA		_IOR(LED_IOC_TYPE, 10, int)
-#define	LED_IOC_SET_DATA		_IOW(LED_IOC_TYPE, 11, int)
+#define	LED_IOC_GET_DATA		_IOR(LED_IOC_TYPE, 10, unsigned int)
+#define	LED_IOC_SET_DATA		_IOW(LED_IOC_TYPE, 11, unsigned int)
 
-#define	LED_IOC_MAX_NR			11
+#define	LED_IOC_SET_BLINK_DATA		_IOW(LED_IOC_TYPE, 12, int)
+#define	LED_IOC_GET_BLINK_DATA		_IOR(LED_IOC_TYPE, 13, int)
+
+#define	LED_IOC_SET_RUN_LAMP_POS	_IOW(LED_IOC_TYPE, 14, int)
+#define	LED_IOC_SET_RUN_LAMP_NEG	_IOW(LED_IOC_TYPE, 15, int)
+
+#define	LED_IOC_MAX_NR			15
 
 
 #endif
