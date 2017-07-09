@@ -17,21 +17,21 @@ all:
 	make -C $(KERNEL_DIR) M=`pwd` modules
 	@#mkdir target
 	@#mv *.mod.* *.o *.o* *.sym* target -f
-	arm-linux-gcc app.c -o app
+	#arm-linux-gcc app.c -o app
 	
 
 clean:
 	make -C $(KERNEL_DIR) M=`pwd` clean
 	@#rm target -rf
 	@#rm *.ko
-	rm app -rf
+	#rm app -rf
 
-app:
-	arm-linux-gcc app.c -o app
+#app:
+	#arm-linux-gcc app.c -o app
 
 in:
 	sudo cp *.ko /nfs_mini/mcy -rf
-	sudo cp app /nfs_mini/mcy -rf
+	#sudo cp app /nfs_mini/mcy -rf
 
 install:
 	make -C $(KERNEL_DIR) M=`pwd` modules_install INSTALL_MOD_PATH=$(ROOTFS) 

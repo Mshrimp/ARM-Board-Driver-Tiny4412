@@ -2,7 +2,7 @@
 #include <linux/fs.h>
 
 #include "../include/board.h"
-#include "head.h"
+#include "../include/head.h"
 #include "led.h"
 
 
@@ -42,7 +42,7 @@ void led_init(void)
 
 unsigned int led_all_status_get(void)
 {
-	return get_nbit_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM);
+	return get_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM);
 }
 
 void led_all_status_set(unsigned int led_status)
