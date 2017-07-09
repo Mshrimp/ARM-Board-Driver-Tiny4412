@@ -62,15 +62,25 @@ void led_set_run_lamp_positive(int RunLampData)
 	for (i = 0; i < LED_TOTLE_NUM * 100; i++)
 	{
 		led_on(i%4);
-		delay();
+		msleep(500);
+		//delay();
 		led_off(i%4);
-		delay();
+		msleep(500);
+		//delay();
 	}
 }
 
 void led_set_run_lamp_negative(int RunLampData)
 {
+	int i = 0;
 
+	for (i = LED_TOTLE_NUM * 100; i > 0; i--)
+	{
+		led_on(i%4);
+		msleep(500);
+		led_off(i%4);
+		msleep(500);
+	}
 }
 
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)

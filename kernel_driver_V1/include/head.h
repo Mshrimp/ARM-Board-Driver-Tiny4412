@@ -7,6 +7,7 @@
 #include <linux/fs.h>
 #include <linux/ioctl.h>
 #include <linux/gpio.h>
+#include <linux/delay.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
