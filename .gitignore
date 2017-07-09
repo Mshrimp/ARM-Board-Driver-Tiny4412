@@ -39,6 +39,7 @@ start
 #
 tags
 app
+*.swp
 *.mod.c
 *.order
 *.symvers
