@@ -69,7 +69,7 @@ void set_bit_val(unsigned int reg, unsigned int bit, unsigned val)
 	}
 }
 
-int get_bit_val(unsigned int reg, unsigned int bit)
+unsigned int get_bit_val(unsigned int reg, unsigned int bit)
 {
 	return (hal_readl(reg) & (0x01 << bit));
 }
@@ -79,7 +79,7 @@ void set_nbits_val(unsigned int reg, unsigned int bit, unsigned int num, unsigne
 	hal_writel(((hal_readl(reg) & (~(((0x01<<num)-1)<<bit))) | ((val&((0x01<<num)-1))<<bit)), reg);
 }
 
-int get_nbits_val(unsigned int reg, unsigned int bit, unsigned int num)
+unsigned int get_nbits_val(unsigned int reg, unsigned int bit, unsigned int num)
 {
 	return ((hal_readl(reg)>>bit) & ((0x01<<num)-1));
 }
@@ -89,7 +89,7 @@ void set_reg_val(unsigned int reg, unsigned val)
 	hal_writel(val, reg);
 }
 
-int get_reg_val(unsigned int reg)
+unsigned int get_reg_val(unsigned int reg)
 {
 	return hal_readl(reg);
 }

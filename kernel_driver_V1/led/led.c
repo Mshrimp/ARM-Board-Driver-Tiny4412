@@ -40,8 +40,15 @@ void led_init(void)
 	led_all_off();
 }
 
+unsigned int led_all_status_get(void)
+{
+	return get_nbit_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM);
+}
 
-
+void led_all_status_set(unsigned int led_status)
+{
+	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, led_status);
+}
 
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
@@ -51,10 +58,16 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 	printk("led test ioctl!\n");
 
 	if (_IOC_TYPE(cmd) != LED_IOC_TYPE)
+	{
+		printk("Driver: LED cmd type error!\n");
 		return	-EINVAL;
+	}
 
 	if (_IOC_NR(cmd) > LED_IOC_MAX_NR)
+	{
+		printk("Driver: LED cmd error, No such cmd!\n");
 		return	-EINVAL;
+	}
 
 /*
  *    if (_IOC_DIR(cmd) & _IOC_READ) {
@@ -68,46 +81,58 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 	{
 		case	LED_ALL_OFF:
 			printk("ioctl: All LED Off\n");
+			led_all_off();
 			break;
 		case	LED_ALL_ON:
 			printk("ioctl: All LED On\n");
+			led_all_on();
 			break;
 		case	LED1_OFF:
 			printk("ioctl: LED1 Off\n");
+			led_off(0);
 			break;
 		case	LED1_ON:
 			printk("ioctl: LED1 On\n");
+			led_on(0);
 			break;
 		case	LED2_OFF:
 			printk("ioctl: LED2 Off\n");
+			led_off(1);
 			break;
 		case	LED2_ON:
 			printk("ioctl: LED2 On\n");
+			led_on(1);
 			break;
 		case	LED3_OFF:
 			printk("ioctl: LED3 Off\n");
+			led_off(2);
 			break;
 		case	LED3_ON:
 			printk("ioctl: LED3 On\n");
+			led_on(2);
 			break;
 		case	LED4_OFF:
 			printk("ioctl: LED4 Off\n");
+			led_off(3);
 			break;
 		case	LED4_ON:
 			printk("ioctl: LED4 On\n");
+			led_on(3);
 			break;
 		case	LED_IOC_GET_DATA:
 			printk("ioctl: LED get data\n");
-			ioarg = 0x01;
+			ioarg = led_all_status_get();
 			ret = __put_user(ioarg, (int *)arg);
 			break;
 		case	LED_IOC_SET_DATA:
 			printk("ioctl: LED set data\n");
 			ret = __get_user(ioarg, (int *)arg);
+			led_all_status_set(ioarg);
 			printk("ioctl: LED set data, ioarg = %u\n", ioarg);
 			break;
 
 		default:
+			printk("Driver: LED cmd error");
 			return	-EINVAL;
 	}
 	return 0;
