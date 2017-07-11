@@ -6,6 +6,8 @@
 #include "led.h"
 
 
+/////////////////////////////////////////////////////////////////////裸板驱动
+
 void led_all_off(void)
 {
 	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, (0x01<<LED_TOTLE_NUM)-1);	// Set all GPIO output high
@@ -82,6 +84,8 @@ void led_set_run_lamp_negative(int RunLampData)
 		msleep(500);
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////字符设备框架
 
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
@@ -213,6 +217,7 @@ int led_test_close (struct inode *inodep, struct file *filp)
 	return 0;
 }
 
+/////////////////////////////////////////////////////////////模块
 struct file_operations fops = {
 	.owner = THIS_MODULE,
 	.open = led_test_open,

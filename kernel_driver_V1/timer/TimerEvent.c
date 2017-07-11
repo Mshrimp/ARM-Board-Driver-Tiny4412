@@ -19,7 +19,7 @@ static void timer_loop(void)
 {
 	count++;
 	mod_timer(&EventTimer, jiffies + TimerPeriod);
-	printf("EventTimer: Do something!\n");
+	printk("EventTimer: timer loop, Do something!\n");
 	function_tmp =  EventTimer.handler;
 	if (function_tmp != NULL)
 	{
@@ -35,6 +35,7 @@ static void timer_loop(void)
 
 static void timer_init(void)
 {
+	printk("EventTimer: Timer init!\n");
 	init_timer(&EventTimer);
 
 	EventTimer.expires = jiffies + TimerPeriod;
@@ -45,6 +46,7 @@ static void timer_init(void)
 
 void PeriodEvent_Register(void (*handler)(void), EventPeriodTime)
 {
+	printk("EventTimer: Timer register!\n");
 	PeriodEvent.handler = handler;
 	PeriodEvent.period = EventPeriodTime;
 	PeriodEvent.count = 0;
@@ -52,9 +54,14 @@ void PeriodEvent_Register(void (*handler)(void), EventPeriodTime)
 
 void PeriodEvent_Cancel(void (*handler)(void))
 {
+	printk("EventTimer: Timer cancel!\n");
 	PeriodEvent.handler = NULL;
 	PeriodEvent.period = 0;
 	PeriodEvent.count = 0;
 }
 
-
+void timer_destory(void)
+{
+	del_timer(&EventTimer);
+	printk("EventTimer: Timer destory!\n");
+}

@@ -85,6 +85,49 @@ data:
 
 
 
+/* Set LED blink time
+bit		|	4bit	|	1bit	|	3bit	|	12bit	|	12bit
+name	|  reserve	| directior	|  led_num	|   Ntime	|	Ptime
+
+directior:
+	0	Set data to driver
+	1	Get data to driver
+
+led_num:
+	0~3
+	led_num < LED_TOTLE_NUM
+
+Ntime:
+	The time set to close led, < 2^12(4096)
+
+Ptime:
+	The time set to open led, < 2^12(4096)
+*/
+
+
+#define	LED_IOC_BLINK_DIR_BIT		1
+#define	LED_IOC_BLINK_NUM_BIT		3
+#define	LED_IOC_BLINK_NTIME_BIT		12
+#define	LED_IOC_BLINK_PTIME_BIT		12
+
+#define	LED_IOC_BLINK_DATA_BIT		((LED_IOC_BLINK_NTIME_BIT) + (LED_IOC_BLINK_PTIME_BIT))
+
+#define	LED_IOC_BLINK_TIME(Ntime, Ptime)	\
+		(((Ntime)<<(LED_IOC_BLINK_NTIME_BIT)) | (Ptime))
+
+#define	LED_IOC_BLINK_DATA(dir, num, data)	\
+		((dir)<<((LED_IOC_BLINK_NUM_BIT)+(LED_IOC_BLINK_DATA_BIT)) | ((num)<<(LED_IOC_BLINK_DATA_BIT)) | ((Ntime)<<(LED_IOC_BLINK_NTIME_BIT)) | (Ptime))
+
+#define	LED_IOC_BLINK_DIR(data)	\
+		(((data)>>((LED_IOC_BLINK_NUM_BIT)+(LED_IOC_BLINK_DATA_BIT)))&((0x1<<(LED_IOC_BLINK_DIR_BIT))-1))
+
+#define	LED_IOC_BLINK_NUM(data)	(((data)>>(LED_IOC_BLINK_DATA_BIT))&((0x1<<(LED_IOC_BLINK_NUM_BIT))-1))
+
+#define	LED_IOC_BLINK_DATA(data)	((data)&((0x1<<(LED_IOC_BLINK_DATA_BIT))-1))
+
+#define	LED_IOC_BLINK_NTIME(data)	(((data)>>(LED_IOC_BLINK_PTIME_BIT))&((0x1<<(LED_IOC_BLINK_NTIME_BIT))-1))
+#define	LED_IOC_BLINK_PTIME(data)	((data)&((0x1<<(LED_IOC_BLINK_PTIME_BIT))-1))
+
 #endif
 
 
