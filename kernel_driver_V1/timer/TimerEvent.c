@@ -41,7 +41,6 @@ static void timer_init(void)
 	EventTimer.expires = jiffies + TimerPeriod;
 	EventTimer.function = timer_loop;
 	add_timer(&EventTimer);
-
 }
 
 void PeriodEvent_Register(void (*handler)(void), EventPeriodTime)
@@ -58,6 +57,17 @@ void PeriodEvent_Cancel(void (*handler)(void))
 	PeriodEvent.handler = NULL;
 	PeriodEvent.period = 0;
 	PeriodEvent.count = 0;
+}
+
+void PeriodEventOneShot_Register(void (*handler)(void), EventPeriodTime)
+{
+	printk("EventTimer: OneShot timer register!\n");
+	struct timer_list EventTimerOneShot;
+
+	init_timer(&EventTimerOneShot);
+	EventTimerOneShot.expires = jiffies + EventPeriodTime * 10;
+	EventTimerOneShot.function = handler;
+	add_timer(&EventTimerOneShot);
 }
 
 void timer_destory(void)
