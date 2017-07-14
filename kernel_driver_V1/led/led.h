@@ -2,6 +2,7 @@
 #define	__LED_H__
 
 
+/************************************************************/
 #define	GPM4_BASE				0x11000000
 
 #define	GPM4CON_OFFSET			0x02E0
@@ -52,6 +53,7 @@
 #define	LED_IOC_MAX_NR			15
 
 
+/************************************************************/
 /*
 bit		|	4bit	|	1bit	|	3bit	|	24bit
 name	|  reserve	| directior	|  led_num	|   data

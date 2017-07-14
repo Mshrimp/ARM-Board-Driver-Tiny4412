@@ -233,6 +233,7 @@ static int led_test_init(void)
 {
 	int ret = -1;
 	printk("Hello, led driver chrdev register test begin!\n");
+	led_init();
 
 	ret = register_chrdev(major, "led_test_module", &fops);
 	if (ret < 0)
