@@ -21,6 +21,8 @@ all: $(OBJS)
 	$(OBJDUMP) $(OBJDUMP_FLAGS) $(TARGET) > $(TARGET).dis
 	@mkdir target
 	@mv *.o $(TARGET) *.dis *.bin target
+	@echo -e '\033[1;32m =========== Target OK ============= \033[0m'
+#@echo -e "\e[1;32m =========== Target OK ============= \e[0m"
 
 %.o:%.s
 	$(CC) $(CC_FLAGS) $^
@@ -32,4 +34,5 @@ all: $(OBJS)
 clean:
 	@rm -rf *.o start.dis start start.bin
 	@rm target -rf
-	@echo "======== Clean target ========"
+	@echo -e '\033[1;32m ========== Clean target ========== \033[0m'
+#@echo -e "\e[1;32m ========== Clean target ========== \e[0m"
