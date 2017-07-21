@@ -4,11 +4,11 @@
 #if 1
 
 
-#define hal_set_bit(reg, bit)	((*(reg)) | (0x01 << (bit)))
-#define hal_clr_bit(reg, bit)	((*(reg)) & ~(0x01 << (bit)))
+#define hal_set_bit(reg, bit)	((*(reg)) = ((*(reg)) | (0x01 << (bit))))
+#define hal_clr_bit(reg, bit)	((*(reg)) = ((*(reg)) & ~(0x01 << (bit))))
 
 #if 1
-#define	set_bit_val(reg, bit, val)	(((*(reg)) & ~(0x01 << (bit))) | ((val) << (bit)))
+#define	set_bit_val(reg, bit, val)	((*(reg)) = (((*(reg)) & ~(0x01 << (bit))) | ((val) << (bit))))
 #else
 #define set_bit_val(reg, bit, val)	\
 			((val) ? (hal_set_bit((reg), (bit))) : (hal_clr_bit((reg), (bit))))
@@ -16,11 +16,11 @@
 
 #define	get_bit_val(reg, bit)	((*(reg)) & (0x01<<(bit)))
 
-#define set_nbits_val(reg, bit, num, val)	(((*(reg)) & (~(((0x01<<(num))-1)<<(bit)))) | (((val)&((0x01<<(num))-1))<<(bit)))
+#define set_nbits_val(reg, bit, num, val)	((*(reg)) = (((*(reg)) & (~(((0x01<<(num))-1)<<(bit)))) | (((val)&((0x01<<(num))-1))<<(bit))))
 
 #define get_nbits_val(reg, bit, num)	(((*(reg)) >> (bit)) & ((0x01<<(num))-1))
 
-#define set_reg_val(reg, val)	((*(reg)) & 0 | (val))
+#define set_reg_val(reg, val)	((*(reg)) = ((*(reg)) & 0 | (val)))
 
 #define get_reg_val(reg)	(*(reg))
 
@@ -66,7 +66,7 @@ unsigned int get_bit_val(unsigned int reg, unsigned int bit)
 	return (hal_readl(reg) & (0x01 << bit));
 }
 
-void set_nbits_val(unsigned int reg, unsigned int bit, unsigned int num, unsigned val)
+void set_nbits_val(unsigned int reg, unsigned int bit, unsigned int num, unsigned int val)
 {
 	printk("set nbits val\n");
 	hal_writel(((hal_readl(reg) & (~(((0x01<<num)-1)<<bit))) | ((val&((0x01<<num)-1))<<bit)), reg);
@@ -78,7 +78,7 @@ unsigned int get_nbits_val(unsigned int reg, unsigned int bit, unsigned int num)
 	return ((hal_readl(reg)>>bit) & ((0x01<<num)-1));
 }
 
-void set_reg_val(unsigned int reg, unsigned val)
+void set_reg_val(unsigned int reg, unsigned int val)
 {
 	hal_writel(val, reg);
 }

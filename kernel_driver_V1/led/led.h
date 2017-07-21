@@ -19,8 +19,8 @@
 #define	LED_CON_ADDR			GPM4CON_ADDR
 #define	LED_DAT_ADDR			GPM4DAT_ADDR
 
-#define	LED_CON_ADDR_P			((volatile unsigned int *)ioremap((GPM4CON_ADDR), 32)
-#define	LED_DAT_ADDR_P			((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32)
+#define	LED_CON_ADDR_P			((volatile unsigned int *)ioremap((GPM4CON_ADDR), 32))
+#define	LED_DAT_ADDR_P			((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32))
 
 
 #define	DEV_NAME				"test_dev_led"

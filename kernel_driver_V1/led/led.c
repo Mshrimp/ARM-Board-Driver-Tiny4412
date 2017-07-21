@@ -12,7 +12,7 @@ void led_all_off(void)
 {
 	printk("led all off set val\n");
 	// Set all GPIO output high
-	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, ((0x01<<(LED_TOTLE_NUM))-1));
+	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, (0x01<<(LED_TOTLE_NUM))-1);
 	printk("led all off OK\n");
 }
 
@@ -243,7 +243,7 @@ static int led_test_init(void)
 	printk("Init led\n");
 	led_init();
 
-	ret = register_chrdev(major, "led_test_module", &fops);
+	ret = register_chrdev(major, "led_test", &fops);
 	if (ret < 0)
 	{
 		return ret;
@@ -262,7 +262,7 @@ static int led_test_init(void)
 static void led_test_exit(void)
 {
 	printk("Goodbye, led test over!\n");
-	unregister_chrdev(major, "led_test_module");
+	unregister_chrdev(major, "led_test");
 }
 
 
