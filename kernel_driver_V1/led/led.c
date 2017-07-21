@@ -8,7 +8,9 @@
 
 void led_all_off(void)
 {
+	printk("led all off set val");
 	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, (0x01<<LED_TOTLE_NUM)-1);	// Set all GPIO output high
+	printk("led all off OK");
 }
 
 void led_all_on(void)
@@ -31,13 +33,17 @@ void led_off(unsigned int num)
 void led_init(void)
 {
 	int i = 0;
+	printk("Init pin\n");
 
 	for (i = 0; i < LED_TOTLE_NUM; i++)
 	{
 		set_nbits_val(LED_CON_ADDR, i*4, 4, 0x01);	// Set GPIO to output
 	}
+	printk("Init pin OK\n");
 
 	led_all_off();
+	printk("All led off\n");
+
 }
 
 unsigned int led_all_status_get(void)
@@ -228,6 +234,8 @@ static int led_test_init(void)
 {
 	int ret = -1;
 	printk("Hello, led driver chrdev register test begin!\n");
+	printk("Init led\n");
+	led_init();
 
 	ret = register_chrdev(major, "led_test_module", &fops);
 	if (ret < 0)

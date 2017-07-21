@@ -76,7 +76,9 @@ unsigned int get_bit_val(unsigned int reg, unsigned int bit)
 
 void set_nbits_val(unsigned int reg, unsigned int bit, unsigned int num, unsigned val)
 {
+	printk("set nbits val\n");
 	hal_writel(((hal_readl(reg) & (~(((0x01<<num)-1)<<bit))) | ((val&((0x01<<num)-1))<<bit)), reg);
+	printk("set nbits val OK\n");
 }
 
 unsigned int get_nbits_val(unsigned int reg, unsigned int bit, unsigned int num)
