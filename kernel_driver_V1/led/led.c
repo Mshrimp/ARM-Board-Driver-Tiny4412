@@ -10,26 +10,27 @@
 
 void led_all_off(void)
 {
-	printk("led all off set val");
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, (0x01<<LED_TOTLE_NUM)-1);	// Set all GPIO output high
-	printk("led all off OK");
+	printk("led all off set val\n");
+	// Set all GPIO output high
+	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, ((0x01<<(LED_TOTLE_NUM))-1));
+	printk("led all off OK\n");
 }
 
 void led_all_on(void)
 {
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, 0x0);	// Set all GPIO output low
+	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, 0x0);	// Set all GPIO output low
 }
 
 
 void led_on(unsigned int num)
 {
-	set_bit_val(LED_DAT_ADDR, num, 0);		// Set GPIO output low, LED ON
+	set_bit_val(LED_DAT_ADDR_P, num, 0);		// Set GPIO output low, LED ON
 }
 
 
 void led_off(unsigned int num)
 {
-	set_bit_val(LED_DAT_ADDR, num, 1);		// Set GPIO output high, LED OFF
+	set_bit_val(LED_DAT_ADDR_P, num, 1);		// Set GPIO output high, LED OFF
 }
 
 void led_init(void)
@@ -39,7 +40,7 @@ void led_init(void)
 
 	for (i = 0; i < LED_TOTLE_NUM; i++)
 	{
-		set_nbits_val(LED_CON_ADDR, i*4, 4, 0x01);	// Set GPIO to output
+		set_nbits_val(LED_CON_ADDR_P, i*4, 4, 0x01);	// Set GPIO to output
 	}
 	printk("Init pin OK\n");
 
@@ -50,12 +51,12 @@ void led_init(void)
 
 unsigned int led_all_status_get(void)
 {
-	return get_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM);
+	return get_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM);
 }
 
 void led_all_status_set(unsigned int LedStatus)
 {
-	set_nbits_val(LED_DAT_ADDR, 0, LED_TOTLE_NUM, LedStatus);
+	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, LedStatus);
 }
 
 void led_set_blink(int BlinkData)

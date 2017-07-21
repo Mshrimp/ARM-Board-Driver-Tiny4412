@@ -19,6 +19,9 @@
 #define	LED_CON_ADDR			GPM4CON_ADDR
 #define	LED_DAT_ADDR			GPM4DAT_ADDR
 
+#define	LED_CON_ADDR_P			((volatile unsigned int *)ioremap((GPM4CON_ADDR), 32)
+#define	LED_DAT_ADDR_P			((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32)
+
 
 #define	DEV_NAME				"test_dev_led"
 
@@ -120,9 +123,10 @@ Ptime:
 
 #define	LED_IOC_BLINK_TIME(Ntime, Ptime)	\
 		(((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
-
+#if 0
 #define	LED_IOC_BLINK_DATA(dir, num, data)	\
 		(((dir)<<(LED_IOC_BLINK_DIR_SHIFT)) | ((num)<<(LED_IOC_BLINK_NUM_SHIFT)) | ((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
+#endif
 
 #define	LED_IOC_BLINK_DIR(data)	\
 		(((data)>>(LED_IOC_BLINK_DIR_SHIFT))&((0x1<<(LED_IOC_BLINK_DIR_BIT))-1))

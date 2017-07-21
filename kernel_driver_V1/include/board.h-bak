@@ -4,25 +4,31 @@
 #if 1
 
 
-#define hal_set_bit(reg, bit)	((*(reg)) | (0x01 << (bit)))
-#define hal_clr_bit(reg, bit)	((*(reg)) & ~(0x01 << (bit)))
+#define set_bit(reg, bit)	((volatile unsigned int *)(reg) | (0x01 << (bit)))
+#define clr_bit(reg, bit)	((volatile unsigned int *)(reg) & ~(0x01 << (bit)))
 
 #if 1
-#define	set_bit_val(reg, bit, val)	(((*(reg)) & ~(0x01 << (bit))) | ((val) << (bit)))
+#define	set_bit_val(reg, bit, val)	\
+			(((volatile unsigned int *)(reg) & ~(0x01 << (bit))) | ((val) << (bit)))
 #else
 #define set_bit_val(reg, bit, val)	\
-			((val) ? (hal_set_bit((reg), (bit))) : (hal_clr_bit((reg), (bit))))
+			((val) ? (set_bit((reg), (bit))) : (clr_bit((reg), (bit))))
 #endif
 
-#define	get_bit_val(reg, bit)	((*(reg)) & (0x01<<(bit)))
+#define	get_bit_val(reg, bit)	\
+			((volatile unsigned int *)(reg) & (0x01<<(bit)))
 
-#define set_nbits_val(reg, bit, num, val)	(((*(reg)) & (~(((0x01<<(num))-1)<<(bit)))) | (((val)&((0x01<<(num))-1))<<(bit)))
+#define set_nbits_val(reg, bit, num, val)	\
+			((volatile unsigned int *)(reg) & (~(((0x01<<(num))-1)<<(bit))) | (((val)&((0x01<<(num))-1))<<bit))
 
-#define get_nbits_val(reg, bit, num)	(((*(reg)) >> (bit)) & ((0x01<<(num))-1))
+#define get_nbits_val(reg, bit, num)	\
+			(((volatile unsigned int *)(reg) >> (bit)) & ((0x01<<(num))-1))
 
-#define set_reg_val(reg, val)	((*(reg)) & 0 | (val))
+#define set_reg_val(reg, val)	\
+			((volatile unsigned int *)(reg) & 0 | (val))
 
-#define get_reg_val(reg)	(*(reg))
+#define get_reg_val(reg)	\
+			((volatile unsigned int *)(reg))
 
 
 
