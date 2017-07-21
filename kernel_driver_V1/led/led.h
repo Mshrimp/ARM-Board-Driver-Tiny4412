@@ -2,6 +2,7 @@
 #define	__LED_H__
 
 
+/************************************************************/
 #define	GPM4_BASE				0x11000000
 
 #define	GPM4CON_OFFSET			0x02E0
@@ -52,6 +53,7 @@
 #define	LED_IOC_MAX_NR			15
 
 
+/************************************************************/
 /*
 bit		|	4bit	|	1bit	|	3bit	|	24bit
 name	|  reserve	| directior	|  led_num	|   data
@@ -84,6 +86,53 @@ data:
 #define	LED_CTL_DATA(data)	((data)&((0x1<<(LED_CTL_DATA_BIT))-1))
 
 
+
+/* Set LED blink time
+bit		|	4bit	|	1bit	|	3bit	|	12bit	|	12bit
+name	|  reserve	| directior	|  led_num	|   Ntime	|	Ptime
+
+directior:
+	0	Set data to driver
+	1	Get data to driver
+
+led_num:
+	0~3
+	led_num < LED_TOTLE_NUM
+
+Ntime:
+	The time set to close led, < 2^12(4096)
+
+Ptime:
+	The time set to open led, < 2^12(4096)
+*/
+
+
+#define	LED_IOC_BLINK_DIR_BIT		1
+#define	LED_IOC_BLINK_NUM_BIT		3
+#define	LED_IOC_BLINK_NTIME_BIT		12
+#define	LED_IOC_BLINK_PTIME_BIT		12
+
+#define	LED_IOC_BLINK_DATA_BIT		((LED_IOC_BLINK_NTIME_BIT) + (LED_IOC_BLINK_PTIME_BIT))
+
+#define	LED_IOC_BLINK_NTIME_SHIFT	(LED_IOC_BLINK_PTIME_BIT)
+#define	LED_IOC_BLINK_NUM_SHIFT		(LED_IOC_BLINK_NTIME_SHIFT) + (LED_IOC_BLINK_NTIME_BIT)
+#define	LED_IOC_BLINK_DIR_SHIFT		(LED_IOC_BLINK_NUM_SHIFT) + (LED_IOC_BLINK_NUM_BIT)
+
+#define	LED_IOC_BLINK_TIME(Ntime, Ptime)	\
+		(((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
+
+#define	LED_IOC_BLINK_DATA(dir, num, data)	\
+		(((dir)<<(LED_IOC_BLINK_DIR_SHIFT)) | ((num)<<(LED_IOC_BLINK_NUM_SHIFT)) | ((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
+
+#define	LED_IOC_BLINK_DIR(data)	\
+		(((data)>>(LED_IOC_BLINK_DIR_SHIFT))&((0x1<<(LED_IOC_BLINK_DIR_BIT))-1))
+
+#define	LED_IOC_BLINK_NUM(data)	(((data)>>(LED_IOC_BLINK_NUM_SHIFT))&((0x1<<(LED_IOC_BLINK_NUM_BIT))-1))
+
+#define	LED_IOC_BLINK_DATA(data)	((data)&((0x1<<(LED_IOC_BLINK_DATA_BIT))-1))
+
+#define	LED_IOC_BLINK_NTIME(data)	(((data)>>(LED_IOC_BLINK_NTIME_SHIFT))&((0x1<<(LED_IOC_BLINK_NTIME_BIT))-1))
+#define	LED_IOC_BLINK_PTIME(data)	((data)&((0x1<<(LED_IOC_BLINK_PTIME_BIT))-1))
 
 #endif
 
