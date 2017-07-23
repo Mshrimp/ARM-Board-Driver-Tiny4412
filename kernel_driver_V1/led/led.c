@@ -3,7 +3,12 @@
 
 #include "../include/board.h"
 #include "../include/head.h"
+#include "common.h"
 #include "led.h"
+
+
+static volatile unsigned int *led_con_p = NULL;
+static volatile unsigned int *led_dat_p = NULL;
 
 
 /////////////////////////////////////////////////////////////////////裸板驱动
@@ -11,24 +16,24 @@
 void led_all_off(void)
 {
 	printk("led all off set val\n");
-	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, (0x01<<(LED_TOTLE_NUM))-1);		// Set all GPIO output high
+	set_nbits_val(led_dat_p, 0, LED_TOTLE_NUM, (0x01<<(LED_TOTLE_NUM))-1);		// Set all GPIO output high
 }
 
 void led_all_on(void)
 {
-	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, 0x0);	// Set all GPIO output low
+	set_nbits_val(led_dat_p, 0, LED_TOTLE_NUM, 0x0);	// Set all GPIO output low
 }
 
 
 void led_on(unsigned int num)
 {
-	set_bit_val(LED_DAT_ADDR_P, num, 0);		// Set GPIO output low, LED ON
+	set_bit_val(led_dat_p, num, 0);		// Set GPIO output low, LED ON
 }
 
 
 void led_off(unsigned int num)
 {
-	set_bit_val(LED_DAT_ADDR_P, num, 1);		// Set GPIO output high, LED OFF
+	set_bit_val(led_dat_p, num, 1);		// Set GPIO output high, LED OFF
 }
 
 void led_init(void)
@@ -38,7 +43,7 @@ void led_init(void)
 
 	for (i = 0; i < LED_TOTLE_NUM; i++)
 	{
-		set_nbits_val(LED_CON_ADDR_P, i*4, 4, 0x01);	// Set GPIO to output
+		set_nbits_val(led_con_p, i*4, 4, 0x01);	// Set GPIO to output
 	}
 
 	printk("All led off\n");
@@ -47,12 +52,12 @@ void led_init(void)
 
 unsigned int led_all_status_get(void)
 {
-	return get_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM);
+	return get_nbits_val(led_dat_p, 0, LED_TOTLE_NUM);
 }
 
 void led_all_status_set(unsigned int LedStatus)
 {
-	set_nbits_val(LED_DAT_ADDR_P, 0, LED_TOTLE_NUM, LedStatus);
+	set_nbits_val(led_dat_p, 0, LED_TOTLE_NUM, LedStatus);
 }
 
 void led_set_blink(int BlinkData)
@@ -236,14 +241,38 @@ static int led_test_init(void)
 {
 	int ret = -1;
 	printk("Hello, led driver chrdev register test begin!\n");
+
+	led_con_p = ((volatile unsigned int *)ioremap((GPM4CON_ADDR), 32));
+	ERRP_K(led_con_p == NULL, "LED", "led_con_p ioremap", goto ERR_ioremap1);
+    /*
+	 *if (led_con_p == NULL)
+	 *{
+	 *    printk("led_con_p ioremap failed!\n");
+	 *    return -1;
+	 *}
+     */
+
+	led_dat_p = ((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32));
+	ERRP_K(led_dat_p == NULL, "LED", "led_dat_p ioremap", goto ERR_ioremap2);
+    /*
+	 *if (led_dat_p == NULL)
+	 *{
+	 *    printk("led_dat_p ioremap failed!\n");
+	 *    return -1;
+	 *}
+     */
+
 	printk("Init led\n");
 	led_init();
 
 	ret = register_chrdev(major, "led_test", &fops);
-	if (ret < 0)
-	{
-		return ret;
-	}
+	ERRP_K(ret < 0, "LED", "register_chrdev", goto ERR_dev_register);
+    /*
+	 *if (ret < 0)
+	 *{
+	 *    return ret;
+	 *}
+     */
 
 	if (major == 0) {
 		major = ret;
@@ -253,11 +282,19 @@ static int led_test_init(void)
 	}
 
 	return 0;
+ERR_dev_register:
+	iounmap(led_dat_p);
+ERR_ioremap2:
+	iounmap(led_con_p);
+ERR_ioremap1:
+	return -1;
 }
 
 static void led_test_exit(void)
 {
 	printk("Goodbye, led test over!\n");
+	iounmap(led_con_p);
+	iounmap(led_dat_p);
 	unregister_chrdev(major, "led_test");
 }
 
