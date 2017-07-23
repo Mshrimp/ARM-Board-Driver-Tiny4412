@@ -60,7 +60,7 @@
 /************************************************************/	//LED control
 /* Set LED control time
 bit		|	1bit	|	3bit	|	4bit	|	12bit	|	12bit
-name	| directior	|  led_num	|	Count	|   Ntime	|	Ptime
+name	| directior	|  led_num	|	Count	|   Ptime	|	Ntime
 
 directior:
 	0	Set data to driver/Negative
@@ -73,34 +73,37 @@ led_num:
 Count:
 	The count led control
 
+Ptime:
+	The time set to open led, < 2^12(4096)
+
 Ntime:
 	The time set to close led, < 2^12(4096)
 
-Ptime:
-	The time set to open led, < 2^12(4096)
 */
 
 
 #define	LED_IOC_CTRL_DIR_BIT		1
 #define	LED_IOC_CTRL_NUM_BIT		3
 #define	LED_IOC_CTRL_CNT_BIT		4
-#define	LED_IOC_CTRL_NTIME_BIT		12
 #define	LED_IOC_CTRL_PTIME_BIT		12
+#define	LED_IOC_CTRL_NTIME_BIT		12
 
-#define	LED_IOC_CTRL_DATA_BIT		((LED_IOC_CTRL_NTIME_BIT) + (LED_IOC_CTRL_PTIME_BIT))
+#define	LED_IOC_CTRL_TIME_BIT		((LED_IOC_CTRL_NTIME_BIT) + (LED_IOC_CTRL_PTIME_BIT))
 
-#define	LED_IOC_CTRL_NTIME_SHIFT	(LED_IOC_CTRL_PTIME_BIT)
-#define LED_IOC_CTRL_CNT_SHIFT		((LED_IOC_CTRL_NTIME_SHIFT) + (LED_IOC_CTRL_NTIME_BIT))
+
+#define	LED_IOC_CTRL_NTIME_SHIFT	(0)
+#define	LED_IOC_CTRL_PTIME_SHIFT	((LED_IOC_CTRL_NTIME_SHIFT) + (LED_IOC_CTRL_NTIME_BIT))
+#define LED_IOC_CTRL_CNT_SHIFT		((LED_IOC_CTRL_PTIME_SHIFT) + (LED_IOC_CTRL_PTIME_BIT))
 #define	LED_IOC_CTRL_NUM_SHIFT		((LED_IOC_CTRL_CNT_SHIFT) + (LED_IOC_CTRL_CNT_BIT))
 #define	LED_IOC_CTRL_DIR_SHIFT		((LED_IOC_CTRL_NUM_SHIFT) + (LED_IOC_CTRL_NUM_BIT))
 
-#define	LED_IOC_CTRL_TIME(Ntime, Ptime)	\
-		(((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)) | (Ptime))
-#if 0
-#define	LED_IOC_CTRL_DATA(dir, num, data)	\
-		(((dir)<<(LED_IOC_CTRL_DIR_SHIFT)) | ((num)<<(LED_IOC_CTRL_NUM_SHIFT)) | ((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)) | (Ptime))
-#endif
+// Data Package
+#define	LED_IOC_CTRL_TIME(Ptime, Ntime)	\
+		(((Ptime)<<(LED_IOC_CTRL_PTIME_SHIFT)) | ((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)))
+#define	LED_IOC_CTRL_DATA(dir, num, cnt, time)	\
+		(((dir)<<(LED_IOC_CTRL_DIR_SHIFT)) | ((num)<<(LED_IOC_CTRL_NUM_SHIFT)) | ((cnt)<<(LED_IOC_CTRL_CNT_SHIFT)) | ((Ptime)<<(LED_IOC_CTRL_PTIME_SHIFT)) | ((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)))
 
+// Data Unpackage
 #define	LED_IOC_CTRL_DIR(data)	\
 		(((data)>>(LED_IOC_CTRL_DIR_SHIFT))&((0x1<<(LED_IOC_CTRL_DIR_BIT))-1))
 
@@ -109,10 +112,10 @@ Ptime:
 #define	LED_IOC_CTRL_CNT(data)	(((data)>>(LED_IOC_CTRL_CNT_SHIFT))&((0x1<<(LED_IOC_CTRL_CNT_BIT))-1))
 
 
-#define	LED_IOC_CTRL_DATA(data)	((data)&((0x1<<(LED_IOC_CTRL_DATA_BIT))-1))
+#define	LED_IOC_CTRL_DATA(data)	((data)&((0x1<<(LED_IOC_CTRL_TIME_BIT))-1))
 
+#define	LED_IOC_CTRL_PTIME(data)	(((data)>>(LED_IOC_CTRL_PTIME_SHIFT))&((0x1<<(LED_IOC_CTRL_PTIME_BIT))-1))
 #define	LED_IOC_CTRL_NTIME(data)	(((data)>>(LED_IOC_CTRL_NTIME_SHIFT))&((0x1<<(LED_IOC_CTRL_NTIME_BIT))-1))
-#define	LED_IOC_CTRL_PTIME(data)	((data)&((0x1<<(LED_IOC_CTRL_PTIME_BIT))-1))
 
 #endif
 

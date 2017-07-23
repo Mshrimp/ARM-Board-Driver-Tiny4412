@@ -7,11 +7,11 @@
 #define hal_set_bit(reg, bit)	((*(reg)) = ((*(reg)) | (0x01 << (bit))))
 #define hal_clr_bit(reg, bit)	((*(reg)) = ((*(reg)) & ~(0x01 << (bit))))
 
-#if 1
+#if 0
 #define	set_bit_val(reg, bit, val)	((*(reg)) = (((*(reg)) & ~(0x01 << (bit))) | ((val) << (bit))))
 #else
 #define set_bit_val(reg, bit, val)	\
-			((val) ? (hal_set_bit((reg), (bit))) : (hal_clr_bit((reg), (bit))))
+			((*(reg)) = ((val) ? (hal_set_bit((reg), (bit))) : (hal_clr_bit((reg), (bit)))))
 #endif
 
 #define	get_bit_val(reg, bit)	((*(reg)) & (0x01<<(bit)))
