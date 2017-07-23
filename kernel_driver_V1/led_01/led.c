@@ -36,23 +36,15 @@ void led_off(unsigned int num)
 	set_bit_val(led_dat_p, num, 1);		// Set GPIO output high, LED OFF
 }
 
-void led_config(void)
+void led_init(void)
 {
-#if 1
-	set_nbits_val(led_con_p, 0, 4*LED_TOTLE_NUM, 0x1111);	// Set GPIO as output
-#else
 	int i = 0;
+	printk("Init pin\n");
+
 	for (i = 0; i < LED_TOTLE_NUM; i++)
 	{
 		set_nbits_val(led_con_p, i*4, 4, 0x01);	// Set GPIO to output
 	}
-#endif
-}
-
-void led_init(void)
-{
-	printk("Init pin\n");
-	led_config();
 
 	printk("All led off\n");
 	led_all_off();
