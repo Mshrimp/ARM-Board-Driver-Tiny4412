@@ -44,63 +44,34 @@
 #define LED4_OFF				_IO(LED_IOC_TYPE, 8)
 #define LED4_ON					_IO(LED_IOC_TYPE, 9)
 
-#define	LED_IOC_GET_STATUS		_IOR(LED_IOC_TYPE, 10, unsigned int)
-#define	LED_IOC_SET_STATUS		_IOW(LED_IOC_TYPE, 11, unsigned int)
+#define	LED_IOC_SET_STATUS		_IOW(LED_IOC_TYPE, 10, unsigned int)
+#define	LED_IOC_GET_STATUS		_IOR(LED_IOC_TYPE, 11, unsigned int)
 
 #define	LED_IOC_SET_BLINK_DATA		_IOW(LED_IOC_TYPE, 12, int)
 #define	LED_IOC_GET_BLINK_DATA		_IOR(LED_IOC_TYPE, 13, int)
 
-#define	LED_IOC_SET_RUN_LAMP_POS	_IOW(LED_IOC_TYPE, 14, int)
-#define	LED_IOC_SET_RUN_LAMP_NEG	_IOW(LED_IOC_TYPE, 15, int)
+#define	LED_IOC_SET_RUN_LAMP_DATA	_IOW(LED_IOC_TYPE, 14, int)
+#define	LED_IOC_GET_RUN_LAMP_DATA	_IOW(LED_IOC_TYPE, 15, int)
 
 #define	LED_IOC_MAX_NR			15
 
 
-/************************************************************/
-/*
-bit		|	4bit	|	1bit	|	3bit	|	24bit
-name	|  reserve	| directior	|  led_num	|   data
+
+/************************************************************/	//LED control
+/* Set LED control time
+bit		|	1bit	|	3bit	|	4bit	|	12bit	|	12bit
+name	| directior	|  led_num	|	Count	|   Ntime	|	Ptime
 
 directior:
-	0	Set data to driver
-	1	Get data to driver
+	0	Set data to driver/Negative
+	1	Get data to driver/Positive
 
 led_num:
 	0~3
 	led_num < LED_TOTLE_NUM
 
-data:
-	The data set to driver or get from driver
-*/
-
-
-#define	LED_CTL_DIR_BIT		1
-#define	LED_CTL_NUM_BIT		3
-#define	LED_CTL_DATA_BIT	24
-
-#define	LED_IOC_DATA(dir, num, data)	\
-		((dir)<<((LED_CTL_NUM_BIT)+(LED_CTL_DATA_BIT)) | ((num)<<(LED_CTL_DATA_BIT)) | (data))
-
-#define	LED_CTL_DIR(data)	\
-		(((data)>>((LED_CTL_NUM_BIT)+(LED_CTL_DATA_BIT)))&((0x1<<(LED_CTL_DIR_BIT))-1))
-
-#define	LED_CTL_NUM(data)	(((data)>>(LED_CTL_DATA_BIT))&((0x1<<(LED_CTL_NUM_BIT))-1))
-
-#define	LED_CTL_DATA(data)	((data)&((0x1<<(LED_CTL_DATA_BIT))-1))
-
-
-
-/* Set LED blink time
-bit		|	4bit	|	1bit	|	3bit	|	12bit	|	12bit
-name	|  reserve	| directior	|  led_num	|   Ntime	|	Ptime
-
-directior:
-	0	Set data to driver
-	1	Get data to driver
-
-led_num:
-	0~3
-	led_num < LED_TOTLE_NUM
+Count:
+	The count led control
 
 Ntime:
 	The time set to close led, < 2^12(4096)
@@ -110,33 +81,38 @@ Ptime:
 */
 
 
-#define	LED_IOC_BLINK_DIR_BIT		1
-#define	LED_IOC_BLINK_NUM_BIT		3
-#define	LED_IOC_BLINK_NTIME_BIT		12
-#define	LED_IOC_BLINK_PTIME_BIT		12
+#define	LED_IOC_CTRL_DIR_BIT		1
+#define	LED_IOC_CTRL_NUM_BIT		3
+#define	LED_IOC_CTRL_CNT_BIT		4
+#define	LED_IOC_CTRL_NTIME_BIT		12
+#define	LED_IOC_CTRL_PTIME_BIT		12
 
-#define	LED_IOC_BLINK_DATA_BIT		((LED_IOC_BLINK_NTIME_BIT) + (LED_IOC_BLINK_PTIME_BIT))
+#define	LED_IOC_CTRL_DATA_BIT		((LED_IOC_CTRL_NTIME_BIT) + (LED_IOC_CTRL_PTIME_BIT))
 
-#define	LED_IOC_BLINK_NTIME_SHIFT	(LED_IOC_BLINK_PTIME_BIT)
-#define	LED_IOC_BLINK_NUM_SHIFT		(LED_IOC_BLINK_NTIME_SHIFT) + (LED_IOC_BLINK_NTIME_BIT)
-#define	LED_IOC_BLINK_DIR_SHIFT		(LED_IOC_BLINK_NUM_SHIFT) + (LED_IOC_BLINK_NUM_BIT)
+#define	LED_IOC_CTRL_NTIME_SHIFT	(LED_IOC_CTRL_PTIME_BIT)
+#define LED_IOC_CTRL_CNT_SHIFT		((LED_IOC_CTRL_NTIME_SHIFT) + (LED_IOC_CTRL_NTIME_BIT))
+#define	LED_IOC_CTRL_NUM_SHIFT		((LED_IOC_CTRL_CNT_SHIFT) + (LED_IOC_CTRL_CNT_BIT))
+#define	LED_IOC_CTRL_DIR_SHIFT		((LED_IOC_CTRL_NUM_SHIFT) + (LED_IOC_CTRL_NUM_BIT))
 
-#define	LED_IOC_BLINK_TIME(Ntime, Ptime)	\
-		(((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
+#define	LED_IOC_CTRL_TIME(Ntime, Ptime)	\
+		(((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)) | (Ptime))
 #if 0
-#define	LED_IOC_BLINK_DATA(dir, num, data)	\
-		(((dir)<<(LED_IOC_BLINK_DIR_SHIFT)) | ((num)<<(LED_IOC_BLINK_NUM_SHIFT)) | ((Ntime)<<(LED_IOC_BLINK_NTIME_SHIFT)) | (Ptime))
+#define	LED_IOC_CTRL_DATA(dir, num, data)	\
+		(((dir)<<(LED_IOC_CTRL_DIR_SHIFT)) | ((num)<<(LED_IOC_CTRL_NUM_SHIFT)) | ((Ntime)<<(LED_IOC_CTRL_NTIME_SHIFT)) | (Ptime))
 #endif
 
-#define	LED_IOC_BLINK_DIR(data)	\
-		(((data)>>(LED_IOC_BLINK_DIR_SHIFT))&((0x1<<(LED_IOC_BLINK_DIR_BIT))-1))
+#define	LED_IOC_CTRL_DIR(data)	\
+		(((data)>>(LED_IOC_CTRL_DIR_SHIFT))&((0x1<<(LED_IOC_CTRL_DIR_BIT))-1))
 
-#define	LED_IOC_BLINK_NUM(data)	(((data)>>(LED_IOC_BLINK_NUM_SHIFT))&((0x1<<(LED_IOC_BLINK_NUM_BIT))-1))
+#define	LED_IOC_CTRL_NUM(data)	(((data)>>(LED_IOC_CTRL_NUM_SHIFT))&((0x1<<(LED_IOC_CTRL_NUM_BIT))-1))
 
-#define	LED_IOC_BLINK_DATA(data)	((data)&((0x1<<(LED_IOC_BLINK_DATA_BIT))-1))
+#define	LED_IOC_CTRL_CNT(data)	(((data)>>(LED_IOC_CTRL_CNT_SHIFT))&((0x1<<(LED_IOC_CTRL_CNT_BIT))-1))
 
-#define	LED_IOC_BLINK_NTIME(data)	(((data)>>(LED_IOC_BLINK_NTIME_SHIFT))&((0x1<<(LED_IOC_BLINK_NTIME_BIT))-1))
-#define	LED_IOC_BLINK_PTIME(data)	((data)&((0x1<<(LED_IOC_BLINK_PTIME_BIT))-1))
+
+#define	LED_IOC_CTRL_DATA(data)	((data)&((0x1<<(LED_IOC_CTRL_DATA_BIT))-1))
+
+#define	LED_IOC_CTRL_NTIME(data)	(((data)>>(LED_IOC_CTRL_NTIME_SHIFT))&((0x1<<(LED_IOC_CTRL_NTIME_BIT))-1))
+#define	LED_IOC_CTRL_PTIME(data)	((data)&((0x1<<(LED_IOC_CTRL_PTIME_BIT))-1))
 
 #endif
 

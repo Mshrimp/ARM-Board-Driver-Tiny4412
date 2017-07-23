@@ -60,12 +60,83 @@ void led_all_status_set(unsigned int LedStatus)
 	set_nbits_val(led_dat_p, 0, LED_TOTLE_NUM, LedStatus);
 }
 
-void led_set_blink(int BlinkData)
+void led_set_blink(unsigned long BlinkData)
 {
+	int dir = -1;
+	int num = -1;
+	int blinkNtime = 0;
+	int blinkPtime = 0;
+	int blinkCount = 0;
 
+	dir = LED_IOC_CTRL_DIR(BlinkData);
+	num = LED_IOC_CTRL_NUM(BlinkData);
+	blinkCount = LED_IOC_CTRL_CNT(BlinkData);
+	blinkNtime = LED_IOC_CTRL_NTIME(BlinkData);
+	blinkPtime = LED_IOC_CTRL_PTIME(BlinkData);
+
+	while (blinkCount--)
+	{
+		led_on(num);
+		msleep(blinkPtime);
+		led_off(num);
+		msleep(blinkNtime);
+	}
 }
 
-void led_set_run_lamp_positive(int RunLampData)
+void led_set_run_lamp_positive(int startNum, int runLampCount, int runLmapPtime, int runLmapNtime)
+{
+	int i = 0;
+
+	for (i = startNum; i < (runLampCount*LED_TOTLE_NUM+startNum); i++)
+	{
+		led_on(i%4);
+		msleep(runLmapPtime);
+		led_off(i%4);
+		msleep(runLmapNtime);
+	}
+}
+
+void led_set_run_lamp_negative(int startNum, int runLampCount, int runLmapPtime, int runLmapNtime)
+{
+	int i = 0;
+
+	for (i = (runLampCount*LED_TOTLE_NUM+startNum); i > startNum; i--)
+	{
+		led_on(i%4);
+		msleep(runLmapPtime);
+		led_off(i%4);
+		msleep(runLmapNtime);
+	}
+}
+
+void led_set_runlamp(unsigned long RunLampData)
+{
+	int dir = -1;
+	int startNum = -1;
+	int runLampNtime = 0;
+	int runLampPtime = 0;
+	int runLampCount = 0;
+	int count = 0;
+
+	dir = LED_IOC_CTRL_DIR(RunLampData);
+	startNum = LED_IOC_CTRL_NUM(RunLampData);
+	runLampCount = LED_IOC_CTRL_CNT(RunLampData);
+	runLampNtime = LED_IOC_CTRL_NTIME(RunLampData);
+	runLampPtime = LED_IOC_CTRL_PTIME(RunLampData);
+
+	count = runLampCount * LED_TOTLE_NUM + startNum;
+
+	if (dir > 0)
+	{
+		led_set_run_lamp_positive(startNum, runLampCount, runLampPtime, runLampNtime);
+	}
+	else if (dir == 0)
+	{
+		led_set_run_lamp_negative(startNum, runLampCount, runLampPtime, runLampNtime);
+	}
+}
+
+void led_set_run_lamp_positive_dep(void)
 {
 	int i = 0;
 
@@ -80,7 +151,7 @@ void led_set_run_lamp_positive(int RunLampData)
 	}
 }
 
-void led_set_run_lamp_negative(int RunLampData)
+void led_set_run_lamp_negative_dep(void)
 {
 	int i = 0;
 
@@ -166,32 +237,37 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 			printk("ioctl: LED4 On\n");
 			led_on(3);
 			break;
-		case	LED_IOC_GET_STATUS:
-			printk("ioctl: LED get status\n");
-			LedStatus = led_all_status_get();
-			ret = __put_user(LedStatus, (int *)arg);
-			break;
+
 		case	LED_IOC_SET_STATUS:
 			printk("ioctl: LED set status\n");
 			ret = __get_user(LedStatus, (int *)arg);
 			led_all_status_set(LedStatus);
 			printk("ioctl: LED set status, LedStatus = %u\n", LedStatus);
 			break;
+		case	LED_IOC_GET_STATUS:
+			printk("ioctl: LED get status\n");
+			LedStatus = led_all_status_get();
+			ret = __put_user(LedStatus, (int *)arg);
+			break;
 		case	LED_IOC_SET_BLINK_DATA:
 			printk("ioctl: LED set blink data\n");
 			ret = __get_user(LedBlinkData, (int *)arg);
+			printk("ioctl: arg = %lu\n", arg);
+			led_set_blink(arg);
 			break;
 		case	LED_IOC_GET_BLINK_DATA:
 			printk("ioctl: LED get blink data\n");
 			ret = __put_user(LedBlinkData, (int *)arg);
 			break;
-		case	LED_IOC_SET_RUN_LAMP_POS:
+		case	LED_IOC_SET_RUN_LAMP_DATA:
 			printk("ioctl: LED set RunLamp positive data\n");
 			ret = __get_user(LedRunLampData, (int *)arg);
+			printk("ioctl: arg = %lu\n", arg);
+			led_set_runlamp(arg);
 			break;
-		case	LED_IOC_SET_RUN_LAMP_NEG:
-			printk("ioctl: LED set RunLamp negative data\n");
-			ret = __get_user(LedRunLampData, (int *)arg);
+		case	LED_IOC_GET_RUN_LAMP_DATA:
+			printk("ioctl: LED get RunLamp negative data\n");
+			ret = __put_user(LedRunLampData, (int *)arg);
 			break;
 
 		default:
@@ -244,35 +320,15 @@ static int led_test_init(void)
 
 	led_con_p = ((volatile unsigned int *)ioremap((GPM4CON_ADDR), 32));
 	ERRP_K(led_con_p == NULL, "LED", "led_con_p ioremap", goto ERR_ioremap1);
-    /*
-	 *if (led_con_p == NULL)
-	 *{
-	 *    printk("led_con_p ioremap failed!\n");
-	 *    return -1;
-	 *}
-     */
 
 	led_dat_p = ((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32));
 	ERRP_K(led_dat_p == NULL, "LED", "led_dat_p ioremap", goto ERR_ioremap2);
-    /*
-	 *if (led_dat_p == NULL)
-	 *{
-	 *    printk("led_dat_p ioremap failed!\n");
-	 *    return -1;
-	 *}
-     */
 
 	printk("Init led\n");
 	led_init();
 
 	ret = register_chrdev(major, "led_test", &fops);
 	ERRP_K(ret < 0, "LED", "register_chrdev", goto ERR_dev_register);
-    /*
-	 *if (ret < 0)
-	 *{
-	 *    return ret;
-	 *}
-     */
 
 	if (major == 0) {
 		major = ret;
@@ -292,6 +348,7 @@ ERR_ioremap1:
 
 static void led_test_exit(void)
 {
+	led_all_off();
 	printk("Goodbye, led test over!\n");
 	iounmap(led_con_p);
 	iounmap(led_dat_p);
