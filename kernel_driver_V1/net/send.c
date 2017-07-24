@@ -18,7 +18,7 @@
 
 #define	LISTEN_NUM	10
 #define	PORT		8888
-#define SER_IP		"192.168.0.110"
+#define SER_IP		"192.169.0.109"
 
 int main(int argc, char *argv[])
 {

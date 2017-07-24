@@ -39,6 +39,8 @@ start
 #
 tags
 app
+recv
+send
 *.swp
 *.mod.c
 *.order

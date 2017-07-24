@@ -76,8 +76,10 @@ int main(int argc, char *argv[])
 
 		memset(buf, 0, sizeof(buf));
 		read(fd, buf, sizeof(buf));
-		printf("Server: fd = %d, buf = %s\n", fd, buf);
+		printf("Server: Socketfd = %d, fd = %d, buf = %s\n", Socketfd, fd, buf);
 		printf("Server: ip: %s, port: %d\n", inet_ntoa(Client_addr.sin_addr), ntohs(Client_addr.sin_port));
+
+		close(fd);
 	}
 
 
