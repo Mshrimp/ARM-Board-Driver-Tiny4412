@@ -26,6 +26,7 @@ void led_note(void)
 int	led_ioctl(int fd, unsigned int cmd)
 {
 	int ret = -1;
+	unsigned long arg = 0;
 
 	switch(cmd)
 	{
@@ -67,7 +68,7 @@ int	led_ioctl(int fd, unsigned int cmd)
 			break;	
 		case 3:
 			printf("App: ioctl cmd = %d, LED1 On\n", cmd);
-			ret = ioctl(fd, LED_ALL_ON, NULL);
+			ret = ioctl(fd, LED1_ON, NULL);
 			ERRP(ret < 0, "LED", "LED1_ON", goto ERR1);
 			/*
 			 *if (ret < 0)
@@ -91,7 +92,7 @@ int	led_ioctl(int fd, unsigned int cmd)
 			break;	
 		case 5:
 			printf("App: ioctl cmd = %d, LED2 On\n", cmd);
-			ret = ioctl(fd, LED_ALL_ON, NULL);
+			ret = ioctl(fd, LED2_ON, NULL);
 			ERRP(ret < 0, "LED", "LED2_ON", goto ERR1);
 			/*
 			 *if (ret < 0)
@@ -115,7 +116,7 @@ int	led_ioctl(int fd, unsigned int cmd)
 			break;	
 		case 7:
 			printf("App: ioctl cmd = %d, LED3 On\n", cmd);
-			ret = ioctl(fd, LED_ALL_ON, NULL);
+			ret = ioctl(fd, LED3_ON, NULL);
 			ERRP(ret < 0, "LED", "LED3_ON", goto ERR1);
 			/*
 			 *if (ret < 0)
@@ -139,7 +140,7 @@ int	led_ioctl(int fd, unsigned int cmd)
 			break;	
 		case 9:
 			printf("App: ioctl cmd = %d, LED4 On\n", cmd);
-			ret = ioctl(fd, LED_ALL_ON, NULL);
+			ret = ioctl(fd, LED4_ON, NULL);
 			ERRP(ret < 0, "LED", "LED4_ON", goto ERR1);
 			/*
 			 *if (ret < 0)
@@ -151,8 +152,9 @@ int	led_ioctl(int fd, unsigned int cmd)
 			break;	
 		case 10:
 			printf("App: ioctl cmd = %d, Get LED Data\n", cmd);
-			ret = ioctl(fd, LED_IOC_GET_STATUS, NULL);
+			ret = ioctl(fd, LED_IOC_GET_STATUS, &arg);
 			ERRP(ret < 0, "LED", "LED get status", goto ERR1);
+			printf("App: LED get status = 0x%X\n", arg);
 			/*
 			 *if (ret < 0)
 			 *{
