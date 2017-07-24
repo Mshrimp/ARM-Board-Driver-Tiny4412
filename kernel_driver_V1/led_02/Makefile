@@ -17,8 +17,9 @@ all:
 	make -C $(KERNEL_DIR) M=`pwd` modules
 	@#mkdir target
 	@#mv *.mod.* *.o *.o* *.sym* target -f
-	arm-linux-gcc app.c -o app
+	arm-linux-gcc -Wl,-dynamic-linker=/system/lib/ld-linux.so.3 app.c -o app
 	chmod 775 led.ko
+#arm-linux-gcc app.c -o app
 	
 
 clean:
@@ -31,8 +32,10 @@ app:
 	arm-linux-gcc app.c -o app
 
 in:
-	sudo cp *.ko /nfs_mini/mcy -rf
-	sudo cp app /nfs_mini/mcy -rf
+	adb push led.ko /cache
+	adb push app /cache
+#sudo cp *.ko /nfs_mini/mcy -rf
+#sudo cp app /nfs_mini/mcy -rf
 
 install:
 	make -C $(KERNEL_DIR) M=`pwd` modules_install INSTALL_MOD_PATH=$(ROOTFS) 

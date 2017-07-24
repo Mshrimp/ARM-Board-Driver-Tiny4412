@@ -79,8 +79,11 @@ void led_set_blink(unsigned long BlinkData)
 	dir = LED_IOC_CTRL_DIR(BlinkData);
 	num = LED_IOC_CTRL_NUM(BlinkData);
 	blinkCount = LED_IOC_CTRL_CNT(BlinkData);
-	blinkNtime = LED_IOC_CTRL_NTIME(BlinkData);
 	blinkPtime = LED_IOC_CTRL_PTIME(BlinkData);
+	blinkNtime = LED_IOC_CTRL_NTIME(BlinkData);
+
+	printk("num = %d, blinkCount = %d\n", num, blinkCount);
+	printk("blinkPtime = 0x%X, blinkNtime = 0x%X\n", blinkPtime, blinkNtime);
 
 	while (blinkCount--)
 	{
@@ -129,8 +132,10 @@ void led_set_runlamp(unsigned long RunLampData)
 	dir = LED_IOC_CTRL_DIR(RunLampData);
 	startNum = LED_IOC_CTRL_NUM(RunLampData);
 	runLampCount = LED_IOC_CTRL_CNT(RunLampData);
-	runLampNtime = LED_IOC_CTRL_NTIME(RunLampData);
 	runLampPtime = LED_IOC_CTRL_PTIME(RunLampData);
+	runLampNtime = LED_IOC_CTRL_NTIME(RunLampData);
+
+	printk("runLampPtime = %d, runLampNtime = %d\n", runLampPtime, runLampNtime);
 
 	count = runLampCount * LED_TOTLE_NUM + startNum;
 
@@ -152,10 +157,8 @@ void led_set_run_lamp_positive_dep(void)
 	{
 		led_on(i%4);
 		msleep(500);
-		//delay();
 		led_off(i%4);
 		msleep(500);
-		//delay();
 	}
 }
 
@@ -177,9 +180,9 @@ void led_set_run_lamp_negative_dep(void)
 long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret = -1;
-	unsigned int LedStatus = 0;
-	int LedBlinkData = 0;
-	int LedRunLampData = 0;
+	unsigned long LedStatus = 0;
+	unsigned long LedBlinkData = 0;
+	unsigned long LedRunLampData = 0;
 
 	printk("led test ioctl!\n");
 
@@ -249,8 +252,9 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 		case	LED_IOC_SET_STATUS:
 			printk("ioctl: LED set status\n");
 			ret = __get_user(LedStatus, (int *)arg);
-			led_all_status_set(LedStatus);
-			printk("ioctl: LED set status, LedStatus = %u\n", LedStatus);
+			printk("ioctl: LedStatus = 0x%lX", arg);
+			led_all_status_set(arg);
+			printk("ioctl: LED set status, LedStatus = 0x%lX\n", arg);
 			break;
 		case	LED_IOC_GET_STATUS:
 			printk("ioctl: LED get status\n");
@@ -260,21 +264,21 @@ long led_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 		case	LED_IOC_SET_BLINK_DATA:
 			printk("ioctl: LED set blink data\n");
 			ret = __get_user(LedBlinkData, (int *)arg);
-			printk("ioctl: arg = %lu\n", arg);
+			printk("ioctl: arg = 0x%lX\n", arg);
 			led_set_blink(arg);
 			break;
 		case	LED_IOC_GET_BLINK_DATA:
 			printk("ioctl: LED get blink data\n");
 			ret = __put_user(LedBlinkData, (int *)arg);
 			break;
-		case	LED_IOC_SET_RUN_LAMP_DATA:
-			printk("ioctl: LED set RunLamp positive data\n");
+		case	LED_IOC_SET_RUNLAMP_DATA:
+			printk("ioctl: LED set RunLamp data\n");
 			ret = __get_user(LedRunLampData, (int *)arg);
-			printk("ioctl: arg = %lu\n", arg);
+			printk("ioctl: arg = 0x%lX\n", arg);
 			led_set_runlamp(arg);
 			break;
-		case	LED_IOC_GET_RUN_LAMP_DATA:
-			printk("ioctl: LED get RunLamp negative data\n");
+		case	LED_IOC_GET_RUNLAMP_DATA:
+			printk("ioctl: LED get RunLamp data\n");
 			ret = __put_user(LedRunLampData, (int *)arg);
 			break;
 
