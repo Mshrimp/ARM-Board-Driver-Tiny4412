@@ -10,6 +10,7 @@
 #include <linux/delay.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
+#include <linux/interrupt.h>
 
 
 #endif

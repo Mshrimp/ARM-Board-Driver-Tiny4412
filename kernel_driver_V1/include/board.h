@@ -18,7 +18,8 @@
 
 #define set_nbits_val(reg, bit, num, val)	((*(reg)) = (((*(reg)) & (~(((0x01<<(num))-1)<<(bit)))) | (((val)&((0x01<<(num))-1))<<(bit))))
 
-#define get_nbits_val(reg, bit, num)	(((*(reg)) >> (bit)) & ((0x01<<(num))-1))
+//#define get_nbits_val(reg, bit, num)	(((*(reg)) >> (bit)) & ((0x01<<(num))-1))
+#define get_nbits_val(reg, bit, num)	((*(reg)) & (((0x01<<(num))-1)<<bit))
 
 #define set_reg_val(reg, val)	((*(reg)) = ((*(reg)) & 0 | (val)))
 
