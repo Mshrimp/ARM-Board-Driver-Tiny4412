@@ -23,7 +23,7 @@
 #define	LED_DAT_ADDR_P			((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32))
 
 
-#define	DEV_NAME				"test_dev_led"
+#define	LED_DEV_NAME			"test_dev_led"
 
 #define LED_IOC_TYPE			'L'
 
@@ -119,5 +119,40 @@ Ntime:
 #define	LED_IOC_CTRL_NTIME(data)	(((data)>>(LED_IOC_CTRL_NTIME_SHIFT))&((0x1<<(LED_IOC_CTRL_NTIME_BIT))-1))
 
 #endif
+
+
+
+
+
+
+void led_all_off(void);
+
+void led_all_on(void);
+
+void led_on(unsigned int num);
+
+void led_off(unsigned int num);
+
+void led_config(void);
+
+void led_init(void);
+
+unsigned int led_all_status_get(void);
+
+void led_all_status_set(unsigned int LedStatus);
+
+int led_set_blink(unsigned long BlinkData);
+
+void led_set_run_lamp_positive(int startNum, int runLampCount, int runLmapPtime, int runLmapNtime);
+
+void led_set_run_lamp_negative(int startNum, int runLampCount, int runLmapPtime, int runLmapNtime);
+
+int led_set_runlamp(unsigned long RunLampData);
+
+void led_set_run_lamp_positive_dep(void);
+
+void led_set_run_lamp_negative_dep(void);
+
+
 
 

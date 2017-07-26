@@ -377,7 +377,7 @@ static int led_test_init(void)
 	printk("Init led\n");
 	led_init();
 
-	ret = register_chrdev(major, "led_test", &fops);
+	ret = register_chrdev(major, LED_DEV_NAME, &fops);
 	ERRP_K(ret < 0, "LED", "register_chrdev", goto ERR_dev_register);
 
 	if (major == 0) {
@@ -402,7 +402,7 @@ static void led_test_exit(void)
 	printk("Goodbye, led test over!\n");
 	iounmap(led_con_p);
 	iounmap(led_dat_p);
-	unregister_chrdev(major, "led_test");
+	unregister_chrdev(major, LED_DEV_NAME);
 }
 
 

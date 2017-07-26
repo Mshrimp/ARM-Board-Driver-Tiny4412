@@ -54,6 +54,20 @@ int is_key_down(int num)
 	// return (key_get_val(num) ? 0 : 1);
 }
 
+int sure_key_down(int num)
+{
+	if (is_key_down(num))
+	{
+		msleep(10);
+		if (is_key_down(num))
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 unsigned int key_all_status_get(void)
 {
 	return get_nbits_val(key_dat_p, 2, KEY_TOTLE_NUM);
@@ -72,7 +86,7 @@ void key_chk_status(void)
 
 		for (i = 0; i < KEY_TOTLE_NUM; i++)
 		{
-			if (is_key_down(i))
+			if (sure_key_down(i))
 			{
 				printk("KEY: key %d down, count = %d\n", i, count);
 				count++;

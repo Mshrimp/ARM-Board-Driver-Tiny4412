@@ -23,7 +23,7 @@
 #define	LED_DAT_ADDR_P			((volatile unsigned int *)ioremap((GPM4DAT_ADDR), 32))
 
 
-#define	DEV_NAME				"test_dev_led"
+#define	LED_DEV_NAME			"test_dev_led"
 
 #define LED_IOC_TYPE			'L'
 
