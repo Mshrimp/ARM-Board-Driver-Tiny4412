@@ -14,8 +14,9 @@ static volatile unsigned int *key_dat_p = NULL;
 
 /////////////////////////////////////////////////////////////////////裸板驱动
 
-void key_config(void)
+int key_config(void)
 {
+	unsigned long ret = 0;
 #if 1
 	set_nbits_val(key_con_p, 2*4, 4*KEY_TOTLE_NUM, 0x0);	// Set GPIO as input
 #else
@@ -25,6 +26,14 @@ void key_config(void)
 		set_nbits_val(key_con_p, (i+2)*4, 4, 0x0);	// Set GPIO to input
 	}
 #endif
+	ret = get_nbits_val(key_con_p, 2*4, 4*KEY_TOTLE_NUM);
+	if (ret != 0)
+	{
+		printk("KEY: config set bits failed\n");
+		return -1;
+	}
+
+	return 0;
 }
 
 unsigned int key_get_all_status(void)
@@ -32,16 +41,23 @@ unsigned int key_get_all_status(void)
 	return get_nbits_val(key_dat_p, 2, KEY_TOTLE_NUM);
 }
 
-void key_init(void)
+int key_init(void)
 {
 	int i = 0;
 	int ret = -1;
 
 	printk("Init pin\n");
-	key_config();
+	ret = key_config();
+	if (ret < 0)
+	{
+		printk("KEY: init, key_config failed\n");
+		return -1;
+	}
 
 	ret = key_get_all_status();
 	printk("KEY: key all status = 0x%X\n", ret);
+
+	return 0;
 }
 
 int key_get_val(int num)
@@ -127,7 +143,7 @@ void key_irq_exit(void)
 	irq_num3 = gpio_to_irq(EXYNOS4_GPX3(4));
 	irq_num4 = gpio_to_irq(EXYNOS4_GPX3(5));
 
-	// 请求中断
+	// 注销中断
 	free_irq(irq_num1, (void *)"key1");
 	free_irq(irq_num2, (void *)"key2");
 	free_irq(irq_num3, (void *)"key3");
@@ -220,7 +236,8 @@ static int key_test_init(void)
 	ERRP_K(key_dat_p == NULL, "KEY", "key_dat_p ioremap", goto ERR_ioremap2);
 
 	printk("Init key\n");
-	key_init();
+	ret = key_init();
+	ERRP_K(ret < 0; "KEY", "key_init", goto ERR_init);
 
 /*
  *    ret = register_chrdev(major, KEY_DEV_NAME, &fops);
@@ -238,8 +255,10 @@ static int key_test_init(void)
 	key_irq_init();
 
 	return 0;
-ERR_dev_register:
+
+ERR_irq:
 	key_irq_exit();
+ERR_init:
 	iounmap(key_dat_p);
 ERR_ioremap2:
 	iounmap(key_con_p);
