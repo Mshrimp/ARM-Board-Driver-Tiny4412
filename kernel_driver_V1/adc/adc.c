@@ -17,10 +17,11 @@ static volatile unsigned int *adc_mux_p = NULL;
 
 int adc_config(void)
 {
-	set_bit_val(adc_cfg_p, 16, ADC_GENERAL);
+	//set_bit_val(adc_cfg_p, 16, ADC_GENERAL);
 	set_bit_val(adc_con_p, 16, ADCCON_12BIT_CONV);
 	set_bit_val(adc_con_p, 14, ADCCON_CONV_PRESC_ENABLE);
 	set_nbits_val(adc_con_p, 6, 8, 19);
+	printk("ADC: adc_config, get val = 0x%X\n", get_nbits_val(adc_con_p, 6, 8));
 	return 0;
 }
 
@@ -39,6 +40,16 @@ void adc_conv_read_disable(void)
 	set_bit_val(adc_con_p, 1, ADCCON_CONV_READ_START_DISABLE);
 }
 
+void adc_conv_normal(void)
+{
+	set_bit_val(adc_con_p, 2, ADCCON_CONV_NORMAL);
+}
+
+void adc_conv_standby(void)
+{
+	set_bit_val(adc_con_p, 2, ADCCON_CONV_STANDBY);
+}
+
 void adc_conv_start_enable(void)
 {
 	set_bit_val(adc_con_p, 0, ADCCON_CONV_START_ENABLE);
@@ -52,6 +63,11 @@ unsigned int adc_get_data(void)
 void adc_set_channel(int num)
 {
 	set_nbits_val(adc_mux_p, 0, ADCMUX_AIN_BIT, num);
+}
+
+unsigned long adc_get_con_val(void)
+{
+	return get_nbits_val(adc_con_p, 0, 17);
 }
 
 int adc_init(void)
@@ -74,14 +90,25 @@ int adc_init(void)
 
 void adc_conv(void)
 {
+	int ret = -1;
 	int i = 0;
 	int data = 0;
+	int count = 0;
+	unsigned long result = 0;
 
+	adc_conv_normal();
+	adc_conv_read_enable();
 	adc_conv_start_enable();
 	printk("ADC: start conv\n");
 
-	while(i < 10)
+	while(i < 10 && count < 10)
 	{
+		result = adc_get_con_val();
+		printk("ADC: ret = 0x%lX, i = %d, count = %d\n", result, i, count);
+		msleep(1000);
+		count++;
+		result = adc_get_con_val();
+		printk("ADC: ret = 0x%lX, count = %d\n", result, count);
 		if (is_adc_conv_end())
 		{
 			printk("ADC: conv end\n");

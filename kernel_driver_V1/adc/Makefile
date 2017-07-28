@@ -11,6 +11,7 @@ TARGET_DIR := /nfs_mini/mcy
 #CROSS_COMPILE=arm-linux-
 #CC=$(CROSS_COMPILE)gcc
 
+vpath %.h	../include
 
 
 all:
@@ -22,16 +23,18 @@ all:
 #arm-linux-gcc app.c -o app
 
 
-
+.PHONY: clean
 clean:
 	make -C $(KERNEL_DIR) M=`pwd` clean
 	@#rm target -rf
 	@#rm *.ko
 	rm app -rf
 
+.PHONY: app
 app:
 	arm-linux-gcc app.c -o app
 
+.PHONY: in
 in:
 	adb push adc.ko /cache
 	adb push app /cache
