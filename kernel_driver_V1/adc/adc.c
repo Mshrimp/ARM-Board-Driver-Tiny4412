@@ -15,13 +15,24 @@ static volatile unsigned int *adc_mux_p = NULL;
 
 /////////////////////////////////////////////////////////////////////裸板驱动
 
+void adc_conv_normal(void)
+{
+	set_bit_val(adc_con_p, 2, ADCCON_CONV_NORMAL);
+}
+
+void adc_conv_standby(void)
+{
+	set_bit_val(adc_con_p, 2, ADCCON_CONV_STANDBY);
+}
+
 int adc_config(void)
 {
 	//set_bit_val(adc_cfg_p, 16, ADC_GENERAL);
 	set_bit_val(adc_con_p, 16, ADCCON_12BIT_CONV);
 	set_bit_val(adc_con_p, 14, ADCCON_CONV_PRESC_ENABLE);
 	set_nbits_val(adc_con_p, 6, 8, 19);
-	printk("ADC: adc_config, get val = 0x%X\n", get_nbits_val(adc_con_p, 6, 8));
+	adc_conv_normal();
+	//printk("ADC: adc_config, get val = 0x%X\n", get_nbits_val(adc_con_p, 6, 8));
 	return 0;
 }
 
@@ -38,16 +49,6 @@ void adc_conv_read_enable(void)
 void adc_conv_read_disable(void)
 {
 	set_bit_val(adc_con_p, 1, ADCCON_CONV_READ_START_DISABLE);
-}
-
-void adc_conv_normal(void)
-{
-	set_bit_val(adc_con_p, 2, ADCCON_CONV_NORMAL);
-}
-
-void adc_conv_standby(void)
-{
-	set_bit_val(adc_con_p, 2, ADCCON_CONV_STANDBY);
 }
 
 void adc_conv_start_enable(void)
@@ -96,7 +97,6 @@ void adc_conv(void)
 	int count = 0;
 	unsigned long result = 0;
 
-	adc_conv_normal();
 	adc_conv_read_enable();
 	adc_conv_start_enable();
 	printk("ADC: start conv\n");
@@ -104,11 +104,10 @@ void adc_conv(void)
 	while(i < 10 && count < 10)
 	{
 		result = adc_get_con_val();
-		printk("ADC: ret = 0x%lX, i = %d, count = %d\n", result, i, count);
+		printk("ADC: result = 0x%lX, i = %d, count = %d\n", result, i, count);
 		msleep(1000);
+		printk("ADC: result = 0x%lX, i = %d, count = %d\n", result, i, count);
 		count++;
-		result = adc_get_con_val();
-		printk("ADC: ret = 0x%lX, count = %d\n", result, count);
 		if (is_adc_conv_end())
 		{
 			printk("ADC: conv end\n");
