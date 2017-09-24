@@ -119,7 +119,6 @@ int	led_ioctl(int fd, unsigned int cmd)
 			ERRP(ret < 0, "LED", "LED get run lamp data", goto ERR1);
 			printf("App: LED get get run lamp data = 0x%X\n", arg);
 			break;
-
 		default:
 			printf("App: Wrong cmd!\n");
 			break;
@@ -144,25 +143,11 @@ int main(int argc, char *argv[])
 
 	fd = open(argv[1], O_RDWR);
 	ERRP(fd < 0, "App", "open dev", goto ERR1);
-    /*
-	 *if (fd < 0)
-	 *{
-	 *    perror("App: open");
-	 *    return -1;
-	 *}
-     */
 	printf("App: open, fd = %d\n", fd);
 
 	printf("App: ioctl all LED Off\n");
 	ret = ioctl(fd, LED_ALL_OFF, NULL);
 	ERRP(ret < 0, "App", "LED_ALL_OFF", goto ERR1);
-    /*
-	 *if (ret < 0)
-	 *{
-	 *    perror("App: ioctl, All LED Off\n");
-	 *    return -1;
-	 *}
-     */
 
 	while(1)
 	{

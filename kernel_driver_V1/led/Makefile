@@ -15,17 +15,17 @@ TARGET_DIR := /nfs_mini/mcy
 
 all:
 	make -C $(KERNEL_DIR) M=`pwd` modules
-	@#mkdir target
-	@#mv *.mod.* *.o *.o* *.sym* target -f
-	arm-linux-gcc -Wl,-dynamic-linker=/system/lib/ld-linux.so.3 app.c -o app
 	chmod 775 led.ko
-#arm-linux-gcc app.c -o app
+	-@mkdir target
+	-@mv *.mod.* *.o *.o* *.sym* target -f
+	#arm-linux-gcc -Wl,-dynamic-linker=/system/lib/ld-linux.so.3 app.c -o app
+	arm-linux-gcc app.c -o app
 	
 
 clean:
 	make -C $(KERNEL_DIR) M=`pwd` clean
-	@#rm target -rf
-	@#rm *.ko
+	@rm target -rf
+	#@rm *.ko
 	rm app -rf
 
 app:
@@ -39,6 +39,7 @@ in:
 
 install:
 	make -C $(KERNEL_DIR) M=`pwd` modules_install INSTALL_MOD_PATH=$(ROOTFS) 
+	sudo cp *.ko app $(TARGET_DIR) 
 
 	
 
