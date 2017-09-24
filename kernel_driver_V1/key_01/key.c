@@ -163,8 +163,15 @@ struct file_operations fops = {
 
 int major = 0;
 
+static int key_gpio_init(void)
+{
+
+	return 0;
+}
+
 static int key_test_init(void)
 {
+	int ret = -1;
 	printk("Hello, key driver chrdev register test begin!\n");
 
 	key_con_p = ((volatile unsigned int *)ioremap((GPX3CON_ADDR), 32));
@@ -173,25 +180,24 @@ static int key_test_init(void)
 	key_dat_p = ((volatile unsigned int *)ioremap((GPX3DAT_ADDR), 32));
 	ERRP_K(key_dat_p == NULL, "KEY", "key_dat_p ioremap", goto ERR_ioremap2);
 
-	printk("Init key\n");
 	key_init();
 
-/*
- *    ret = register_chrdev(major, KEY_DEV_NAME, &fops);
- *    ERRP_K(ret < 0, "KEY", "register_chrdev", goto ERR_dev_register);
- *
- *    if (major == 0) {
- *        major = ret;
- *        printk("major = %d\n", major);
- *    } else {
- *        printk("major = %d\n", major);
- *    }
- */
+	ret = register_chrdev(major, KEY_DEV_NAME, &fops);
+	ERRP_K(ret < 0, "KEY", "register_chrdev", goto ERR_dev_register);
+
+	if (major == 0) {
+		major = ret;
+		printk("major = %d\n", major);
+	} else {
+		printk("major = %d\n", major);
+	}
 
 	key_chk_status();
 
 	return 0;
 
+ERR_dev_register:
+	iounmap(key_dat_p);
 ERR_ioremap2:
 	iounmap(key_con_p);
 ERR_ioremap1:
