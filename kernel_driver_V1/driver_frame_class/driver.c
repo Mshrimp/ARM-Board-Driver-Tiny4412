@@ -1,5 +1,6 @@
 #include <linux/module.h>
 #include <linux/fs.h>
+#include <linux/device.h>
 #include "common.h"
 
 #define DEV_NAME	"test_driver"
@@ -52,17 +53,29 @@ struct file_operations fops = {
 };
 
 int major = 0;
+struct class *driver_class;
+struct device *driver_class_device;
 
 static int driver_test_init(void)
 {
 	printk("Hello, driver chrdev register test begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
-	ERRP_K(major < 0, "LED", "register_chrdev", goto ERR_dev_register);
+	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
+
+	driver_class = class_create(THIS_MODULE, "driver_class");
+	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
+
+	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
+	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
 	printk("major = %d\n", major);
 
 	return 0;
+ERR_class_device_create:
+	device_destroy(driver_class, MKDEV(major, 0));
+ERR_class_create:
+	unregister_chrdev(major, DEV_NAME);
 ERR_dev_register:
 	return -1;
 }
@@ -70,6 +83,8 @@ ERR_dev_register:
 static void driver_test_exit(void)
 {
 	printk("Goodbye, test over!\n");
+	class_destroy(driver_class);
+	device_destroy(driver_class, MKDEV(major, 0));
 	unregister_chrdev(major, DEV_NAME);
 }
 
