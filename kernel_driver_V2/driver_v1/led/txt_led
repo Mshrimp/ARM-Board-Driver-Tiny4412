@@ -1,0 +1,25 @@
+
+LED
+
+LED1	-->	GPM4_0
+LED2	-->	GPM4_1
+LED3	-->	GPM4_2
+LED4	-->	GPM4_3
+低电平触发
+
+
+BASE	0x1100_0000
+
+GPM4CON		0x110002E0
+	GPM4_0	[3:0]
+	GPM4_1	[7:4]
+	GPM4_2	[11:8]
+	GPM4_3	[15:12]
+		0x0		Input
+		0x1		Output
+
+GPM4DAT		0x110002E4
+	GPM4_0	--	GPM4_3	[7:0]
+		0x0		Low
+		0x1		High
+

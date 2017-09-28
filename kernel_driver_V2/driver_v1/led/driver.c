@@ -3,7 +3,12 @@
 #include <linux/device.h>
 #include "common.h"
 
+#include "led.h"
+
 #define DEV_NAME	"test_driver"
+
+volatile unsigned long *led_con_p = NULL;
+volatile unsigned long *led_dat_p = NULL;
 
 
 /////////////////////////////////////////////////////////////////////裸板驱动
@@ -70,6 +75,9 @@ static int driver_test_init(void)
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
 	printk("major = %d\n", major);
+	
+	led_con_p = ioremap(LED_CON_ADDR);
+	led_dat_p = led_con_p + 1;
 
 	return 0;
 ERR_class_device_create:
@@ -83,6 +91,8 @@ ERR_dev_register:
 static void driver_test_exit(void)
 {
 	printk("Goodbye, test over!\n");
+
+	iounmap(led_con_p);
 	class_destroy(driver_class);
 	device_destroy(driver_class, MKDEV(major, 0));
 	unregister_chrdev(major, DEV_NAME);
