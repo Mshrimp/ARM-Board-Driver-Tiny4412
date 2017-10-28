@@ -27,13 +27,16 @@ long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 
 ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
+	int minor = 0;
 	int val = 0;
 	int ret = 0;
+
+	minor = MINOR(filp->f_dentry->d_inode->i_rdev);
+	printk("Driver: minor = %d\n", minor);
 
 	printk("Driver: test write!\n");
 	printk("Driver: buf = %d, size = %d\n", *(int *)buf, size);
 	ret = copy_from_user((void *)&val, buf, size);
-	//copy_from_user(&(void *)val, buf, (unsigned long)size);
 	printk("Driver: val = %d, ret = %d\n", val, ret);
 
 	if (val == 0) {
@@ -54,8 +57,11 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 
 int driver_test_open (struct inode *inodep, struct file *filp)
 {
+	int minor = 0;
 	printk("Driver: test open!\n");
 
+	minor = MINOR(inodep->i_rdev);
+	printk("Driver: minor = %d\n", minor);
 	printk("Driver: led config\n");
 	*led_con_p &= ~0xFFFF;
 	*led_con_p |= 0x1111;
@@ -83,21 +89,35 @@ struct file_operations fops = {
 };
 
 int major = 0;
-struct class *driver_class;
-struct device *driver_class_device;
+struct class *driver_class = NULL;
+struct device *driver_class_device[LED_TOTLE + 1] = { NULL };
 
 static int driver_test_init(void)
 {
+	int i = 0;
 	printk("Hello, driver chrdev register test begin!\n");
 
+	printk("line: %d\n", __LINE__);
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
+	printk("line: %d\n", __LINE__);
 
 	driver_class = class_create(THIS_MODULE, "driver_class");
 	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
+	printk("line: %d\n", __LINE__);
 
-	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
-	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
+	driver_class_device[0] = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_devices");
+	ERRP_K(driver_class_device[0] == NULL, "Driver", "class_device_create", goto ERR_class_device_creates);
+	printk("line: %d\n", __LINE__);
+
+	for (i = 0; i <= LED_TOTLE; i++) {
+		driver_class_device[i] = device_create(driver_class, NULL, MKDEV(major, i), NULL, "driver_class_device%d", i);
+		if (unlikely(IS_ERR(driver_class_device[i]))) {
+			return PTR_ERR(driver_class_device[i]);
+		}
+		//ERRP_K(driver_class_device[i] == NULL, "Driver", "class_device_create", goto ERR_class_device_createi);
+	printk("line: %d\n", __LINE__);
+	}
 
 	printk("major = %d\n", major);
 	
@@ -108,8 +128,12 @@ static int driver_test_init(void)
 	return 0;
 ERR_ioremap:
 	//device_unregister(driver_class_device);
+	for (i = 0; i <= LED_TOTLE; i++) {
+		device_destroy(driver_class, MKDEV(major, i));
+	}
+ERR_class_device_createi:
 	device_destroy(driver_class, MKDEV(major, 0));
-ERR_class_device_create:
+ERR_class_device_creates:
 	class_destroy(driver_class);
 ERR_class_create:
 	unregister_chrdev(major, DEV_NAME);
@@ -119,11 +143,14 @@ ERR_dev_register:
 
 static void driver_test_exit(void)
 {
+	int i = 0;
 	printk("Goodbye, test over!\n");
 
 	iounmap(led_con_p);
 	//device_unregister(driver_class_device);
-	device_destroy(driver_class, MKDEV(major, 0));
+	for (i = 0; i <= LED_TOTLE; i++) {
+		device_destroy(driver_class, MKDEV(major, i));
+	}
 	class_destroy(driver_class);
 	unregister_chrdev(major, DEV_NAME);
 }
