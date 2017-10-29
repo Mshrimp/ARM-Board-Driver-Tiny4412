@@ -41,7 +41,8 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 
 	/* Read key pin value */
 	key_val = *key_dat_p;
-	printk("Driver: read key_con_p: 0x%X\n", *key_con_p);
+	printk("Driver: read *key_con_p: 0x%X\n", *key_con_p);
+	printk("Driver: read *key_dat_p: 0x%X\n", *key_dat_p);
 	printk("Driver: read key val: 0x%X\n", key_val);
 
 	for (i = 0; i < KEY_TOTLE; i++) {
@@ -102,9 +103,11 @@ static int driver_test_init(void)
 
 	printk("major = %d\n", major);
 	
+	printk("Driver: init, KEY_CON_ADDR: 0x%X\n", KEY_CON_ADDR);
 	key_con_p = (volatile unsigned long *)ioremap(KEY_CON_ADDR, 16);
 	ERRP_K(NULL == key_con_p, "Driver", "key_con_p ioremap", goto ERR_ioremap);
 	key_dat_p = key_con_p + 1;
+	printk("Driver: init, key_con_p: 0x%X, key_dat_p: 0x%X\n", key_con_p, key_dat_p);
 
 	return 0;
 ERR_ioremap:
