@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
 	while(1)
 	{
-		printf("App：Please input the cmd:\n");
+		printf("App：Please input the cmd:(0-On, 1-Off)\n");
 		scanf("%d", &cmd);
 		ret = write(fd, &cmd, sizeof(int));
 		ERRP(ret < 0, "App", "write failed", goto ERR2);
