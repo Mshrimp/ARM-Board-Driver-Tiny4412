@@ -1,0 +1,30 @@
+
+Button
+
+Button1	-->	XEINT26	-->	GPX3_2
+Button2	-->	XEINT27	-->	GPX3_3
+Button3	-->	XEINT28	-->	GPX3_4
+Button4	-->	XEINT29	-->	GPX3_5
+
+触发：
+	按下----低电平
+	松开----高电平
+
+
+BASE	0x1100_0000
+
+GPX3CON		0x11000C60
+	GPX3_2	[11:8]
+	GPX3_3	[15:12]
+	GPX3_4	[19:16]
+	GPX3_5	[23:20]
+		0x0		Input
+		0x1		Output
+		0xF		Int
+
+GPX3DAT		0x11000C64
+	GPX3_2	--	GPX3_5	[2:5]
+		0x0		Low
+		0x1		High
+
+
