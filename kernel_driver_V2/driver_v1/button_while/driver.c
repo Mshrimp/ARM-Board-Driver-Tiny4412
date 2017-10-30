@@ -41,18 +41,13 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 
 	/* Read key pin value */
 	key_val = *key_dat_p;
-	printk("Driver: read *key_con_p: 0x%X\n", *key_con_p);
-	printk("Driver: read *key_dat_p: 0x%X\n", *key_dat_p);
-	printk("Driver: read key val: 0x%X\n", key_val);
 
 	for (i = 0; i < KEY_TOTLE; i++) {
 		key_vals[i] = (key_val & (0x1 << (i + 2))) ? 1 : 0;
-		printk("Driver: key_vals[%d] = %d\n", i, key_vals[i]);
 	}
 
 
 	ret = copy_to_user(buf, key_vals, sizeof(key_vals));
-	printk("Driver: ret = %d\n", ret);
 
 	return sizeof(key_vals);
 }

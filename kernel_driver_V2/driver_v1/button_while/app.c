@@ -28,22 +28,22 @@ int main(int argc, char *argv[])
 	ERRP(fd < 0, "App", "open dev", goto ERR1);
 	printf("App: open, fd = %d\n", fd);
 
-//	while(1)
+	while(1)
 	{
 		ret = read(fd, key_vals, sizeof(key_vals));
 		ERRP(ret < 0, "App", "read failed", goto ERR2);
+		for (i = 0; i < KEY_TOTLE; i++) {
+			if (!key_vals[i]) {
+				printf("Button: %d down\n", i);
+			}
+		}
+
         /*
-		 *for (i = 0; i < KEY_TOTLE; i++) {
-		 *    if (!key_vals[i]) {
-		 *        //printf("Button: %d down\n", i);
-		 *    }
+		 *if ((!key_vals[0]) || (!key_vals[1]) || (!key_vals[2]) || (!key_vals[3])) {
+		 *{
+		 *    printf("Button: %d %d %d %d\n", key_vals[0], key_vals[1], key_vals[2], key_vals[3]);
 		 *}
          */
-
-		//if ((!key_vals[0]) || (!key_vals[1]) || (!key_vals[2]) || (!key_vals[3])) {
-		{
-		printf("Button: %d %d %d %d\n", key_vals[0], key_vals[1], key_vals[2], key_vals[3]);
-		}
 	}
 
 	close(fd);
