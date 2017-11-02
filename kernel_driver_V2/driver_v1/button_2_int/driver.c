@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/interrupt.h>
 #include <asm/io.h>
 #include "common.h"
 
@@ -19,6 +20,19 @@ volatile unsigned long *key_int_pend_p = NULL;
 
 
 ////////////////////////////////////////////////////////////////////////////字符设备框架
+
+static irqreturn_t button_irq(int irq, void *dev_id)
+{
+	unsigned int key_val = 0;
+
+	printk("Driver: button interrupt\n");
+
+	key_val = *key_int_pend_p;
+
+
+	return IRQ_HANDLED;
+}
+
 
 long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
@@ -58,9 +72,23 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 {
 	printk("Driver: test open!\n");
 
-	/* Config GPX3_2 ~ GPX3_5 as input */
-	*key_con_p &= ~(0xFFFF << 2*4);
-	printk("Driver: open key_con_p: 0x%X\n", *key_con_p);
+	/* Config GPX3_2 ~ GPX3_5 as interrupt */
+	*key_con_p |= (0xFFFF << 2*4);
+
+	/* Config GPX3_2 ~ GPX3_5 interrupt as low level trigger */
+	*key_int_con_p &= ~(0xFFFF << 2*4);
+
+	/* Enable GPX3_2 ~ GPX3_5 (XEINT26 ~ XEINT29) Interrupt */
+	*key_int_mask_p &= ~(0xF << 2);
+
+	/* Register IRQ handler */
+	if (request_irq(KEY_IRQ_NUM, button_irq, IRQF_SHARED, "driver_key", NULL)) {
+		printk("Driver: request_irq failed!\n");
+		return -1;
+	}
+
+
+	//printk("Driver: open key_con_p: 0x%X\n", *key_con_p);
 
 	return 0;
 }
@@ -105,10 +133,10 @@ static int driver_test_init(void)
 	key_dat_p = key_con_p + 1;
 	key_int_con_p = (volatile unsigned long *)ioremap(KEY_INT_CON, 4);
 	ERRP_K(NULL == key_int_con_p, "Driver", "key_int_con_p ioremap", goto ERR_ioremap_key_int_con);
-	key_int_mask_p = (volatile unsigned long *)ioremap(KEY_INT_MASK, 4)
-	ERRP_K(NULL == key_int_mask_p, "Driver", "key_int_mask_p ioremap", goto ERR_ioremap_key_mask_con);
-	key_int_pend_p = (volatile unsigned long *)ioremap(KEY_INT_PEND, 4)
-	ERRP_K(NULL == key_int_pend_p, "Driver", "key_int_pend_p ioremap", goto ERR_ioremap_key_pend_con);
+	key_int_mask_p = (volatile unsigned long *)ioremap(KEY_INT_MASK, 4);
+	ERRP_K(NULL == key_int_mask_p, "Driver", "key_int_mask_p ioremap", goto ERR_ioremap_key_int_mask);
+	key_int_pend_p = (volatile unsigned long *)ioremap(KEY_INT_PEND, 4);
+	ERRP_K(NULL == key_int_pend_p, "Driver", "key_int_pend_p ioremap", goto ERR_ioremap_key_int_pend);
 
 	return 0;
 ERR_ioremap_key_int_pend:

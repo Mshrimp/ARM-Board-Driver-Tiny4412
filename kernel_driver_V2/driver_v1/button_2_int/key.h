@@ -29,6 +29,8 @@
 #define	GPIO_INT			0xF
 
 
+#define	KEY_IRQ_NUM			64
+
 #define	KEY_TOTLE			4
 
 
