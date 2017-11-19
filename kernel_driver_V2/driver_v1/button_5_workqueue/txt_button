@@ -1,0 +1,61 @@
+
+Button
+
+Button1	-->	XEINT26	-->	GPX3_2
+Button2	-->	XEINT27	-->	GPX3_3
+Button3	-->	XEINT28	-->	GPX3_4
+Button4	-->	XEINT29	-->	GPX3_5
+
+触发：
+	按下----低电平
+	松开----高电平
+
+
+BASE	0x1100_0000
+
+GPX3CON		0x11000C60
+	GPX3_2	[11:8]
+	GPX3_3	[15:12]
+	GPX3_4	[19:16]
+	GPX3_5	[23:20]
+		0x0		Input
+		0x1		Output
+		0xF		Int
+
+GPX3DAT		0x11000C64
+	GPX3_2	--	GPX3_5	[2:5]
+		0x0		Low
+		0x1		High
+
+
+EXT_INT43CON	0x11000E0C
+	GPX3_2	[10:8]
+	GPX3_3	[14:12]
+	GPX3_4	[18:16]
+	GPX3_5	[22:20]
+		0x0			Low level
+		0x1			High level
+		0x2			Triggers Falling edge
+		0x3			Triggers Rising edge
+		0x4			Triggers Both edge
+		0x5 to 0x7	Reserved
+
+
+EXT_INT43_MASK	0x11000F0C
+	GPX3_2	--	GPX3_5	[2:5]
+		0x0		Enable Interrupt
+		0x1		Masked
+
+
+EXT_INT43_PEND	0x11000F4C
+	GPX3_2	--	GPX3_5	[2:5]
+		0x0		Not occur
+		0x1		Interrupt occurs
+
+
+Key Interrupt Source:	XEINT26 ~ XEINT29
+Key Interrupt ID:	64
+
+16 ~ 31: 64
+
+
