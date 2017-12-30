@@ -1,0 +1,14 @@
+
+i2cSDA3		GPA1_2
+i2cSCL3		GPA1_3
+
+GPIO Configure:
+GPA1CON			0x11400020
+	GPA1CON[2]		[11:8]		0x3		I2C_3_SDA
+	GPA1CON[3]		[15:12]		0x3		I2C_3_SCL
+	
+
+XEINT25
+
+
+
