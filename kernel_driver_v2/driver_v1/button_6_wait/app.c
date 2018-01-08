@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 #include <linux/ioctl.h>
 
-#include "common.h"
 #include "key.h"
 
 #define	DEV_PATH		"/dev/xxx"
@@ -25,7 +24,10 @@ int main(int argc, char *argv[])
 
 	//fd = open(DEV_PATH, O_RDWR);
 	fd = open(argv[1], O_RDWR);
-	ERRP(fd < 0, "App", "open dev", goto ERR1);
+	if (fd < 0) {
+		printf("App: open dev failed\n");
+		goto ERR1;
+	}
 	printf("App: open, fd = %d\n", fd);
 
 	while(1)

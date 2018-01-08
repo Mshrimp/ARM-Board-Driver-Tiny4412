@@ -6,7 +6,6 @@
 #include <linux/gpio.h>
 #include <mach/gpio.h>
 #include <asm/io.h>
-#include "common.h"
 
 #include "key.h"
 
@@ -190,13 +189,22 @@ static int driver_test_init(void)
 	printk("Hello, driver chrdev register test begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
-	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
+	if (major < 0) {
+		DRV_ERROR("register_chrdev failed");
+		goto ERR_dev_register;
+	}
 
 	driver_class = class_create(THIS_MODULE, "driver_class");
-	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
+	if (!driver_class) {
+		DRV_ERROR("class_create failed");
+		goto ERR_class_create;
+	}
 
 	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
-	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
+	if (!driver_class_device) {
+		DRV_ERROR("device_create failed");
+		goto ERR_class_device_create;
+	}
 
 	printk("major = %d\n", major);
 
