@@ -3,6 +3,8 @@
 #include <linux/device.h>
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
+#include <linux/wait.h>
+#include <linux/sched.h>
 #include <linux/gpio.h>
 #include <mach/gpio.h>
 #include <asm/io.h>
@@ -43,6 +45,11 @@ static button_irq_t button_irq[] = {
 };
 
 static struct timer_list button_timer;
+static wait_queue_head_t button_wait_queue;
+
+/*
+ *static DECLEAR_WAIT_QUEUE_HEAD(button_wait_queue);
+ */
 
 static unsigned long key_val;
 static volatile int ev_press = 0;
@@ -73,6 +80,8 @@ static void timer_handler(unsigned long data)
 	}
 
 	ev_press = 1;
+
+	wake_up_interruptible(&button_wait_queue);
 }
 
 static irqreturn_t button_irq_handler(int irq, void *dev_id)
@@ -113,14 +122,15 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 			return -EAGAIN;
 		}
 	} else {
-		//wait_event_interrupt();
+		wait_event_interruptible(button_wait_queue, ev_press);
 	}
+	ev_press = 0;
 
 	ret = copy_to_user(buf, &key_val, 1);
 	if (ret < 0) {
 		DRV_ERROR("copy_to_user failed, ret = %d", ret);
+		return -EFAULT;
 	}
-	ev_press = 0;
 
 	return 0;
 }
@@ -152,6 +162,8 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 	init_timer(&button_timer);
 	button_timer.function = timer_handler;
 	add_timer(&button_timer);
+
+	init_waitqueue_head(&button_wait_queue);
 
 	return 0;
 }
