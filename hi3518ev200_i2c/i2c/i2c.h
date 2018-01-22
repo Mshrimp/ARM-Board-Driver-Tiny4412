@@ -13,4 +13,8 @@ int i2c_write_byte(u8 data);
 
 int i2c_read_byte(u8 *data);
 
+int i2c_test_scl_gpio(void);
+
+int i2c_test_sda_gpio(void);
+
 #endif	/* __I2C_H__ */

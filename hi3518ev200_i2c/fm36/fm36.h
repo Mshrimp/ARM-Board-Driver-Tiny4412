@@ -39,6 +39,8 @@ int fm36_init (void);
 
 int fm36_uninit (void);
 
+int fm36_gpio_test(void);
+
 int fm36_operation(unsigned int cmd, unsigned long args);
 
 #endif

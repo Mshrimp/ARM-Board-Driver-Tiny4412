@@ -47,3 +47,5 @@ send
 *.symvers
 *.cmd
 *_versions
+
+build

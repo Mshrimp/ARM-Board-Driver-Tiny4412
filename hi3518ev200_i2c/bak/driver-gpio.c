@@ -3,7 +3,7 @@
 #include <linux/miscdevice.h>
 #include <linux/fs.h>
 
-#include "fm36/fm36.h"
+#include "led/led.h"
 
 #define	DRIVER_NAME					"hi3518ev200"
 
@@ -40,21 +40,21 @@ static unsigned int drv_poll(struct file *filp, struct poll_table_struct *table)
 static long drv_ioctl(struct file *filp, unsigned int cmd, unsigned long args)
 {
 	int ret = -1;
-	DRV_DEBUG("driver ioctl, cmd = 0x%X", cmd);
+	DRV_DEBUG("driver ioctl, cmd = %d", cmd);
 
-	if (_IOC_TYPE(cmd) != FM36_IOC_MAGIC) {
+	if (_IOC_TYPE(cmd) != LED_IOC_MAGIC) {
 		DRV_ERROR("ioctl cmd type error, type = %d", _IOC_TYPE(cmd));
 		return -EINVAL;
 	}
 
-	if (_IOC_NR(cmd) > FM36_IOC_MAXNR) {
+	if (_IOC_NR(cmd) > LED_IOC_MAXNR) {
 		DRV_ERROR("ioctl cmd nr error, nr = %d", _IOC_NR(cmd));
 		return -EINVAL;
 	}
 
-	ret = fm36_operation(cmd, args);
+	ret = led_operation(cmd, args);
 	if (ret) {
-		DRV_ERROR("fm36 operation failed");
+		DRV_ERROR("led operation failed");
 		return -EFAULT;
 	}
 
@@ -65,11 +65,7 @@ static int drv_open(struct inode *inodp, struct file *filp)
 {
 	DRV_DEBUG("driver open");
 
-	fm36_init();
-
-    /*
-	 *fm36_gpio_test();
-     */
+	led_init();
 
 	return 0;
 }
@@ -78,7 +74,7 @@ static int drv_release(struct inode *inodp, struct file *filp)
 {
 	DRV_DEBUG("driver release");
 
-	fm36_uninit();
+	led_uninit();
 
 	return 0;
 }

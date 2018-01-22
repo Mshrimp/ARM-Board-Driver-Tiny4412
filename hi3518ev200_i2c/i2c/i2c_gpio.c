@@ -28,9 +28,9 @@
 #define	GET_SDA_VAL			get_gpio_val(&i2c_info.sda)
 
 
-#define	I2C_DEBUG(fmt, args...)		\
+#define	i2c_debug(fmt, args...)		\
 			printk("i2c debug: "fmt"(func: %s, line: %d)\n", ##args, __func__, __LINE__);
-#define	I2C_ERROR(fmt, args...)		\
+#define	i2c_error(fmt, args...)		\
 			printk("i2c error: "fmt"(func: %s, line: %d)\n", ##args, __func__, __LINE__);
 
 
@@ -69,36 +69,63 @@ static i2c_info_t i2c_info = {
  *    }
  *
  *    if (i == 10) {
- *        I2C_ERROR("scl busy, set scl high failed");
+ *        i2c_error("scl busy, set scl high failed");
  *    }
  *}
  */
 
 static void i2c_scl_init(void)
 {
-	I2C_DEBUG("scl init");
+	i2c_debug("scl init");
 	SET_SCL_OUT;
 	SET_SCL_HIGH;
 }
 
 static void i2c_sda_init(void)
 {
-	I2C_DEBUG("sda init");
+	i2c_debug("sda init");
 	SET_SDA_OUT;
 	SET_SDA_HIGH;
 }
 
 static void i2c_gpio_init(void)
 {
-	I2C_DEBUG("i2c_gpio_init");
+	i2c_debug("i2c_gpio_init");
 	i2c_sda_init();
 	i2c_scl_init();
 }
 
+int i2c_test_scl_gpio(void)
+{
+	i2c_info.scl.group = 4;
+	i2c_info.scl.bit = 5;
+
+	SET_SCL_OUT;
+	SET_SCL_HIGH;
+	msleep(2000);
+
+	SET_SCL_LOW;
+
+	return 0;
+}
+
+int i2c_test_sda_gpio(void)
+{
+	i2c_info.sda.group = 4;
+	i2c_info.sda.bit = 5;
+
+	SET_SDA_OUT;
+	SET_SDA_HIGH;
+	msleep(2000);
+
+	SET_SDA_LOW;
+
+	return 0;
+}
 
 int i2c_init(void)
 {
-	I2C_DEBUG("i2c_init");
+	i2c_debug("i2c_init");
 
 	spin_lock_init(&i2c_info.lock);
 	mutex_init(&i2c_info.i2c_mutex);
@@ -110,9 +137,12 @@ int i2c_init(void)
 
 int i2c_start(void)
 {
-	I2C_DEBUG("i2c_start");
+	i2c_debug("i2c_start");
 
 	mutex_lock(&i2c_info.i2c_mutex);
+	SET_SDA_OUT;
+	udelay(I2C_DELAY);
+
 	SET_SDA_HIGH;
 	udelay(I2C_DELAY);
 
@@ -131,7 +161,7 @@ int i2c_start(void)
 
 int i2c_stop(void)
 {
-	I2C_DEBUG("i2c_stop");
+	i2c_debug("i2c_stop");
 
 	mutex_lock(&i2c_info.i2c_mutex);
 	SET_SCL_LOW;
@@ -152,7 +182,7 @@ int i2c_stop(void)
 
 static int i2c_send_ack(void)
 {
-	I2C_DEBUG("i2c_send_ack");
+	i2c_debug("i2c_send_ack");
 
 	mutex_lock(&i2c_info.i2c_mutex);
 	SET_SCL_LOW;
@@ -173,7 +203,7 @@ static int i2c_send_ack(void)
 
 static int i2c_send_noack(void)
 {
-	I2C_DEBUG("i2c_send_noack");
+	i2c_debug("i2c_send_noack");
 
 	mutex_lock(&i2c_info.i2c_mutex);
 	SET_SCL_LOW;
@@ -198,6 +228,9 @@ static int i2c_wait_ack(void)
 	int ret = 0;
 
 	mutex_lock(&i2c_info.i2c_mutex);
+	SET_SDA_HIGH;
+	udelay(I2C_DELAY);
+
 	SET_SDA_IN;
 	udelay(I2C_DELAY);
 
@@ -214,7 +247,6 @@ static int i2c_wait_ack(void)
 			ret = 1;
 			break;
 		}
-		printk("\nack_times = %d\n", ack_times);
 	}
 
 	SET_SCL_LOW;
@@ -238,12 +270,12 @@ int i2c_ack(u8 ack_status)
 		ret = i2c_send_noack();
 		break;
 	default:
-		I2C_ERROR("ack status error");
+		i2c_error("ack status error");
 		return -EINVAL;
 	}
 
 	if (ret) {
-		I2C_ERROR("ack error");
+		i2c_error("ack error");
 	}
 
 	return ret;
@@ -255,7 +287,7 @@ int i2c_write_byte(u8 data)
 	u8 i = 0;
 
 	local_irq_save(flag);
-	//preempt_disable();
+	preempt_disable();
 	mutex_lock(&i2c_info.i2c_mutex);
 	SET_SDA_OUT;
 	udelay(I2C_DELAY);
@@ -277,7 +309,7 @@ int i2c_write_byte(u8 data)
 		data <<= 0x1;
 	}
 	mutex_unlock(&i2c_info.i2c_mutex);
-	//preempt_enable();
+	preempt_enable();
 	local_irq_restore(flag);
 
 	return 0;

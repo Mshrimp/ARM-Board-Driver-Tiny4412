@@ -37,24 +37,16 @@ static const u32 gpio_mux_conf[GPIO_GROUP_NUM][GPIO_BIT_NUM] = {
 
 int set_gpio_output(gpio_t *gpio)
 {
-	unsigned long ret = 0;
-	gpio_debug("set_gpio_output, group: %d, bit: %d", gpio->group, gpio->bit);
 	SET_GPIO_MUX_REG(gpio_mux_reg[gpio->group][gpio->bit], gpio_mux_conf[gpio->group][gpio->bit]);
 	SET_GPIO_DIR_OUTPUT(gpio->group, gpio->bit);
-	ret = GET_GPIO_VAL(gpio->group, gpio->bit);
-	gpio_debug("ret = 0x%lX", ret);
 
 	return 0;
 }
 
 int set_gpio_input(gpio_t *gpio)
 {
-	unsigned long ret = 0;
-	gpio_debug("set_gpio_input, group: %d, bit: %d", gpio->group, gpio->bit);
 	SET_GPIO_MUX_REG(gpio_mux_reg[gpio->group][gpio->bit], gpio_mux_conf[gpio->group][gpio->bit]);
 	SET_GPIO_DIR_INPUT(gpio->group, gpio->bit);
-	ret = GET_GPIO_VAL(gpio->group, gpio->bit);
-	gpio_debug("ret = 0x%lX", ret);
 
 	return 0;
 }
@@ -83,8 +75,6 @@ int set_gpio_output_low(gpio_t *gpio)
 
 int set_gpio_output_val(gpio_t *gpio, unsigned char val)
 {
-	unsigned long ret = 0;
-	gpio_debug("set_gpio_output_val, group: %d, bit: %d, val: %d", gpio->group, gpio->bit, val);
     /*
 	 *SET_GPIO_MUX_REG(gpio_mux_reg[gpio->group][gpio->bit], gpio_mux_conf[gpio->group][gpio->bit]);
 	 *SET_GPIO_DIR_OUTPUT(gpio->group, gpio->bit);
@@ -99,8 +89,6 @@ int set_gpio_output_val(gpio_t *gpio, unsigned char val)
 	 *}
      */
 	SET_GPIO_OUTPUT_VAL(gpio->group, gpio->bit, val);
-	ret = GET_GPIO_VAL(gpio->group, gpio->bit);
-	gpio_debug("ret = 0x%lX", ret);
 
 	return 0;
 }
@@ -108,7 +96,6 @@ int set_gpio_output_val(gpio_t *gpio, unsigned char val)
 int get_gpio_val(gpio_t *gpio)
 {
 	unsigned long ret = 0;
-	gpio_debug("get_gpio_val, group: %d, bit: %d", gpio->group, gpio->bit);
 	SET_GPIO_MUX_REG(gpio_mux_reg[gpio->group][gpio->bit], gpio_mux_conf[gpio->group][gpio->bit]);
 	ret = GET_GPIO_VAL(gpio->group, gpio->bit);
 

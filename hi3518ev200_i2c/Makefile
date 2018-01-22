@@ -11,9 +11,9 @@ DRIVER_NAME = hi3518ev200
 DEVICE_RELYON := driver.o
 DEVICE_RELYON += hi3518ev200/gpio.o
 DEVICE_RELYON += led/led.o
-#DEVICE_RELYON += i2c/i2c_gpio.o
+DEVICE_RELYON += i2c/i2c_gpio.o
 #DEVICE_RELYON += i2c.o
-#DEVICE_RELYON += fm36/fm36.o
+DEVICE_RELYON += fm36/fm36.o
 
 obj-m := $(DRIVER_NAME).o
 $(DRIVER_NAME)-objs := $(DEVICE_RELYON)
