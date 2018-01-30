@@ -4,7 +4,7 @@
 #include <linux/delay.h>
 
 #include "../common.h"
-#include "i2c.h"
+#include "i2c_gpio.h"
 
 #define	I2C_DELAY			10
 

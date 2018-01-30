@@ -3,7 +3,7 @@
 
 #include "../common.h"
 #include "../i2c/i2c.h"
-#include "fm36.h"
+#include "fm36_gpio.h"
 
 #define	FM36_CHIP_ADDR			0xC0
 
