@@ -7,7 +7,7 @@
 
 #include "led.h"
 
-#define DEV_NAME	"test_driver"
+#define DEV_NAME	"led_driver"
 
 volatile unsigned long *led_con_p = NULL;
 volatile unsigned long *led_dat_p = NULL;
@@ -18,19 +18,19 @@ volatile unsigned long *led_dat_p = NULL;
 
 ////////////////////////////////////////////////////////////////////////////字符设备框架
 
-long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
+long driver_led_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
-	printk("Driver: test ioctl!\n");
+	printk("Driver: led ioctl!\n");
 
 	return 0;
 }
 
-ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
+ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
 	int val = 0;
 	int ret = 0;
 
-	printk("Driver: test write!\n");
+	printk("Driver: led write!\n");
 	printk("Driver: buf = %d, size = %d\n", *(int *)buf, size);
 	ret = copy_from_user((void *)&val, buf, size);
 	//copy_from_user(&(void *)val, buf, (unsigned long)size);
@@ -46,15 +46,15 @@ ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t siz
 	return size;
 }
 
-ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
+ssize_t driver_led_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
 {
-	printk("Driver: test read!\n");
+	printk("Driver: led read!\n");
 	return size;
 }
 
-int driver_test_open (struct inode *inodep, struct file *filp)
+int driver_led_open (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: test open!\n");
+	printk("Driver: led open!\n");
 
 	printk("Driver: led config\n");
 	*led_con_p &= ~0xFFFF;
@@ -66,29 +66,29 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 	return 0;
 }
 
-int driver_test_close (struct inode *inodep, struct file *filp)
+int driver_led_close (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: test close!\n");
+	printk("Driver: led close!\n");
 	return 0;
 }
 
 /////////////////////////////////////////////////////////////模块
 struct file_operations fops = {
 	.owner = THIS_MODULE,
-	.open = driver_test_open,
-	.release = driver_test_close,
-	.read = driver_test_read,
-	.write = driver_test_write,
-	.unlocked_ioctl = driver_test_ioctl,
+	.open = driver_led_open,
+	.release = driver_led_close,
+	.read = driver_led_read,
+	.write = driver_led_write,
+	.unlocked_ioctl = driver_led_ioctl,
 };
 
 int major = 0;
 struct class *driver_class;
 struct device *driver_class_device;
 
-static int driver_test_init(void)
+static int driver_led_init(void)
 {
-	printk("Hello, driver chrdev register test begin!\n");
+	printk("Hello, driver chrdev register led begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
@@ -117,9 +117,9 @@ ERR_dev_register:
 	return -1;
 }
 
-static void driver_test_exit(void)
+static void driver_led_exit(void)
 {
-	printk("Goodbye, test over!\n");
+	printk("Goodbye, led over!\n");
 
 	iounmap(led_con_p);
 	//device_unregister(driver_class_device);
@@ -129,8 +129,8 @@ static void driver_test_exit(void)
 }
 
 
-module_init(driver_test_init);
-module_exit(driver_test_exit);
+module_init(driver_led_init);
+module_exit(driver_led_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Mshrimp");
