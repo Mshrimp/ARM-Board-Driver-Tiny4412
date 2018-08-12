@@ -44,6 +44,7 @@ ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t siz
 	switch (minor) {
 		case 0:
 			if (val == 0) {
+				*led_dat_p &= ~0xF;
 			} else {
 				*led_dat_p |= 0xF;
 			}

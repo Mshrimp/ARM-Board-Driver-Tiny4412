@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	//fd = open(argv[1], O_RDWR);
-	fd = open(DEV_PATH, O_RDWR);
+	fd = open(argv[1], O_RDWR);
+	//fd = open(DEV_PATH, O_RDWR);
 	ERRP(fd < 0, "App", "open dev", goto ERR1);
 	printf("App: open, fd = %d\n", fd);
 

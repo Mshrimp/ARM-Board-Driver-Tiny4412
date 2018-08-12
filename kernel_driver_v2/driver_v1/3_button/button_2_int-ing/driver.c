@@ -21,7 +21,7 @@ volatile unsigned long *key_int_pend_p = NULL;
 
 ////////////////////////////////////////////////////////////////////////////字符设备框架
 
-static irqreturn_t button_irq(int irq, void *dev_id)
+static irqreturn_t button_irq_handler(int irq, void *dev_id)
 {
 	unsigned int key_val = 0;
 
@@ -85,7 +85,7 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 
 	/* Register IRQ handler */
 	//if (request_irq(KEY_IRQ_NUM, button_irq, IRQF_SHARED, "driver_key", NULL)) {
-	ret = request_irq(KEY_IRQ_NUM, button_irq, IRQF_TRIGGER_RISING | IRQF_SHARED, "driver_key", &tmp);
+	ret = request_irq(KEY_IRQ_NUM, button_irq_handler, IRQF_TRIGGER_RISING | IRQF_SHARED, "driver_key", (void *)&tmp);
 	if (ret) {
 		printk("Driver: request_irq failed! ret = %d\n", ret);
 		return -1;

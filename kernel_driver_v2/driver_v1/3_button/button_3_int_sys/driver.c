@@ -1,6 +1,6 @@
 #include <linux/module.h>
-#include <linux/fs.h>
 #include <linux/device.h>
+#include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/interrupt.h>
 #include <linux/gpio.h>
@@ -10,14 +10,27 @@
 
 #include "key.h"
 
-#define DEV_NAME	"test_driver"
+#define DEV_NAME	"test_button"
+
+typedef struct {
+	int gpio;
+	int irq;
+	char name[32];
+} key_irq_t; 
+
+key_irq_t key_irq[KEY_TOTLE] = {
+	{EXYNOS4_GPX3(2), 0, "tiny4412_key1"},
+	{EXYNOS4_GPX3(3), 0, "tiny4412_key2"},
+	{EXYNOS4_GPX3(4), 0, "tiny4412_key3"},
+	{EXYNOS4_GPX3(5), 0, "tiny4412_key4"},
+};
 
 /////////////////////////////////////////////////////////////////////裸板驱动
 
 
 ////////////////////////////////////////////////////////////////////////////字符设备框架
 
-static irqreturn_t button_irq(int irq, void *dev_id)
+static irqreturn_t button_irq_handler(int irq, void *dev_id)
 {
 	printk("Driver: button interrupt, irq: %d\n", irq);
 
@@ -47,14 +60,58 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 
 int driver_test_open (struct inode *inodep, struct file *filp)
 {
+	int i = 0;
+	int ret = -1;
+
 	printk("Driver: test open!\n");
+
+	for (i = 0; i < ARRAY_SIZE(key_irq); i++)
+	{
+		if (!key_irq[i].gpio)
+		{
+			continue;
+		}
+
+		key_irq[i].irq = gpio_to_irq(key_irq[i].gpio);
+		printk("Driver open: key_irq[%d].irq: %d\n", i, key_irq[i].irq);
+
+		ret = request_irq(key_irq[i].irq, button_irq_handler, IRQF_TRIGGER_FALLING, key_irq[i].name, (void *)&key_irq[i]);
+		if (ret) {
+			printk("Driver open: request_irq key_irq[%d] failed, ret: %d\n", i, ret);
+			break;
+		}
+	
+	}
+
+	if (ret) {
+		i--;
+		for(; i >= 0; i--) {
+			if (!key_irq[i].gpio) {
+				continue;
+			}
+			free_irq(key_irq[i].irq, (void *)&key_irq[i]);
+		}
+
+		return -1;
+	}
 
 	return 0;
 }
 
 int driver_test_close (struct inode *inodep, struct file *filp)
 {
+	int i = 0;
+
 	printk("Driver: test close!\n");
+
+	for (i = 0; i < ARRAY_SIZE(key_irq); i++)
+	{
+		if (!key_irq[i].gpio) {
+			continue;
+		}
+		free_irq(key_irq[i].irq, (void *)&key_irq[i]);
+		printk("Driver close: free_irq key_irq[%d]\n", i);
+	}
 
 	return 0;
 }
@@ -75,57 +132,19 @@ struct device *driver_class_device;
 
 static int driver_test_init(void)
 {
-	int irq_num1 = 0;
-	int irq_num2 = 0;
-	int irq_num3 = 0;
-	int irq_num4 = 0;
-	int ret = -1;
-
 	printk("Hello, driver chrdev register test begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
 
-	driver_class = class_create(THIS_MODULE, "driver_class");
+	driver_class = class_create(THIS_MODULE, "button_class");
 	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
 
-	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
+	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "button_device");
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
 	printk("major = %d\n", major);
 
-	irq_num1 = gpio_to_irq(EXYNOS4_GPX3(2));
-	printk("Init: irq_num1 = %d\n", irq_num1);
-
-	irq_num2 = gpio_to_irq(EXYNOS4_GPX3(3));
-	printk("Init: irq_num2 = %d\n", irq_num2);
-
-	irq_num3 = gpio_to_irq(EXYNOS4_GPX3(4));
-	printk("Init: irq_num3 = %d\n", irq_num3);
-
-	irq_num4 = gpio_to_irq(EXYNOS4_GPX3(5));
-	printk("Init: irq_num4 = %d\n", irq_num4);
-
-	ret = request_irq(irq_num1, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key1", (void *)"key1");
-	if (ret) {
-		printk("Init: request_irq irq_num1 failed\n");
-	}
-	
-	ret = request_irq(irq_num2, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key2", (void *)"key2");
-	if (ret) {
-		printk("Init: request_irq irq_num2 failed\n");
-	}
-	
-	ret = request_irq(irq_num3, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key3", (void *)"key3");
-	if (ret) {
-		printk("Init: request_irq irq_num3 failed\n");
-	}
-	
-	ret = request_irq(irq_num4, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key4", (void *)"key4");
-	if (ret) {
-		printk("Init: request_irq irq_num4 failed\n");
-	}
-	
 	return 0;
 ERR_class_device_create:
 	class_destroy(driver_class);
@@ -137,29 +156,7 @@ ERR_dev_register:
 
 static void driver_test_exit(void)
 {
-	int irq_num1 = 0;
-	int irq_num2 = 0;
-	int irq_num3 = 0;
-	int irq_num4 = 0;
-
 	printk("Goodbye, test over!\n");
-
-	irq_num1 = gpio_to_irq(EXYNOS4_GPX3(2));
-	printk("Init: irq_num1 = %d\n", irq_num1);
-
-	irq_num2 = gpio_to_irq(EXYNOS4_GPX3(3));
-	printk("Init: irq_num2 = %d\n", irq_num2);
-
-	irq_num3 = gpio_to_irq(EXYNOS4_GPX3(4));
-	printk("Init: irq_num3 = %d\n", irq_num3);
-
-	irq_num4 = gpio_to_irq(EXYNOS4_GPX3(5));
-	printk("Init: irq_num4 = %d\n", irq_num4);
-
-	free_irq(irq_num1, (void *)"key1");
-	free_irq(irq_num2, (void *)"key2");
-	free_irq(irq_num3, (void *)"key3");
-	free_irq(irq_num4, (void *)"key4");
 
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);

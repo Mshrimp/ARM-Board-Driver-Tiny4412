@@ -58,7 +58,7 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 
 	/* Config GPX3_2 ~ GPX3_5 as input */
 	*key_con_p &= ~(0xFFFF << 2*4);
-	printk("Driver: open key_con_p: 0x%X\n", *key_con_p);
+	printk("Driver: open key_con_p: 0x%lX\n", *key_con_p);
 
 	return 0;
 }
@@ -102,7 +102,7 @@ static int driver_test_init(void)
 	key_con_p = (volatile unsigned long *)ioremap(KEY_CON_ADDR, 16);
 	ERRP_K(NULL == key_con_p, "Driver", "key_con_p ioremap", goto ERR_ioremap);
 	key_dat_p = key_con_p + 1;
-	printk("Driver: init, key_con_p: 0x%X, key_dat_p: 0x%X\n", key_con_p, key_dat_p);
+	printk("Driver: init, key_con_p: 0x%p, key_dat_p: 0x%p\n", key_con_p, key_dat_p);
 
 	return 0;
 ERR_ioremap:
