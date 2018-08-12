@@ -7,23 +7,19 @@
 
 #include "common.h"
 
-#define	DEV_PATH		"/dev/xxx"
-
 int main(int argc, char *argv[])
 {
 	int fd;
 	int ret = -1;
 	int cmd = -1;
-	int val = -1;
 
 	if (argc != 2)
 	{
-		fprintf(stderr, "App: Usage: %s /dev/file\n", argv[0]);
+		fprintf(stderr, "App: Usage: %s /dev/xxx\n", argv[0]);
 		return -1;
 	}
 
 	fd = open(argv[1], O_RDWR);
-	//fd = open(DEV_PATH, O_RDWR);
 	ERRP(fd < 0, "App", "open dev", goto ERR1);
 	printf("App: open, fd = %d\n", fd);
 

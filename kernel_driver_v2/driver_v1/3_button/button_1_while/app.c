@@ -8,8 +8,6 @@
 #include "common.h"
 #include "key.h"
 
-#define	DEV_PATH		"/dev/xxx"
-
 int main(int argc, char *argv[])
 {
 	int fd;
@@ -19,11 +17,10 @@ int main(int argc, char *argv[])
 
 	if (argc != 2)
 	{
-		fprintf(stderr, "App: Usage: %s dev_file\n", argv[0]);
+		fprintf(stderr, "App: Usage: %s dev_xxx\n", argv[0]);
 		return -1;
 	}
 
-	//fd = open(DEV_PATH, O_RDWR);
 	fd = open(argv[1], O_RDWR);
 	ERRP(fd < 0, "App", "open dev", goto ERR1);
 	printf("App: open, fd = %d\n", fd);

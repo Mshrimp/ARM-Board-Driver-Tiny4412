@@ -12,19 +12,7 @@
 volatile unsigned long *led_con_p = NULL;
 volatile unsigned long *led_dat_p = NULL;
 
-
-/////////////////////////////////////////////////////////////////////裸板驱动
-
-
 ////////////////////////////////////////////////////////////////////////////字符设备框架
-
-long driver_led_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
-{
-	printk("Driver: led ioctl!\n");
-
-	return 0;
-}
-
 ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
 	int val = 0;
@@ -33,7 +21,7 @@ ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size
 	printk("Driver: led write!\n");
 	printk("Driver: buf = %d, size = %d\n", *(int *)buf, size);
 	ret = copy_from_user((void *)&val, buf, size);
-	//copy_from_user(&(void *)val, buf, (unsigned long)size);
+	ERRP_K(ret != 0, "Driver", "copy_from_user", return -1);
 	printk("Driver: val = %d, ret = %d\n", val, ret);
 
 	if (val == 0) {
@@ -41,7 +29,6 @@ ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size
 	} else {
 		*led_dat_p |= 0xF;
 	}
-
 
 	return size;
 }
@@ -93,10 +80,10 @@ static int driver_led_init(void)
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
 
-	driver_class = class_create(THIS_MODULE, "driver_class");
+	driver_class = class_create(THIS_MODULE, "led_class");
 	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
 
-	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
+	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "led_device");
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
 	printk("major = %d\n", major);
@@ -107,7 +94,6 @@ static int driver_led_init(void)
 
 	return 0;
 ERR_ioremap:
-	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 ERR_class_device_create:
 	class_destroy(driver_class);
@@ -122,12 +108,10 @@ static void driver_led_exit(void)
 	printk("Goodbye, led over!\n");
 
 	iounmap(led_con_p);
-	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);
 	unregister_chrdev(major, DEV_NAME);
 }
-
 
 module_init(driver_led_init);
 module_exit(driver_led_exit);

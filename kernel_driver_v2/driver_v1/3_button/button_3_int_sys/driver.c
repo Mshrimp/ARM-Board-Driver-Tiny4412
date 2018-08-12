@@ -25,11 +25,7 @@ key_irq_t key_irq[KEY_TOTLE] = {
 	{EXYNOS4_GPX3(5), 0, "tiny4412_key4"},
 };
 
-/////////////////////////////////////////////////////////////////////裸板驱动
-
-
 ////////////////////////////////////////////////////////////////////////////字符设备框架
-
 static irqreturn_t button_irq_handler(int irq, void *dev_id)
 {
 	printk("Driver: button interrupt, irq: %d\n", irq);

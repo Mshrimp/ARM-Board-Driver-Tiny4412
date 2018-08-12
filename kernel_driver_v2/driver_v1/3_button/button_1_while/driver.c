@@ -7,17 +7,12 @@
 
 #include "key.h"
 
-#define DEV_NAME	"test_driver"
+#define DEV_NAME	"key_driver"
 
 volatile unsigned long *key_con_p = NULL;
 volatile unsigned long *key_dat_p = NULL;
 
-
-/////////////////////////////////////////////////////////////////////裸板驱动
-
-
 ////////////////////////////////////////////////////////////////////////////字符设备框架
-
 long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	printk("Driver: test ioctl!\n");
@@ -37,7 +32,6 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 	unsigned int key_val = 0;
 	int ret = 0;
 	int i = 0;
-	//printk("Driver: test read!\n");
 
 	/* Read key pin value */
 	key_val = *key_dat_p;
@@ -90,23 +84,20 @@ static int driver_test_init(void)
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
 
-	driver_class = class_create(THIS_MODULE, "driver_class");
+	driver_class = class_create(THIS_MODULE, "key_class");
 	ERRP_K(driver_class == NULL, "Driver", "class_create", goto ERR_class_create);
 
-	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
+	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "key_device");
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
 	printk("major = %d\n", major);
 	
-	printk("Driver: init, KEY_CON_ADDR: 0x%X\n", KEY_CON_ADDR);
 	key_con_p = (volatile unsigned long *)ioremap(KEY_CON_ADDR, 16);
 	ERRP_K(NULL == key_con_p, "Driver", "key_con_p ioremap", goto ERR_ioremap);
 	key_dat_p = key_con_p + 1;
-	printk("Driver: init, key_con_p: 0x%p, key_dat_p: 0x%p\n", key_con_p, key_dat_p);
 
 	return 0;
 ERR_ioremap:
-	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 ERR_class_device_create:
 	class_destroy(driver_class);
@@ -121,12 +112,10 @@ static void driver_test_exit(void)
 	printk("Goodbye, test over!\n");
 
 	iounmap(key_con_p);
-	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);
 	unregister_chrdev(major, DEV_NAME);
 }
-
 
 module_init(driver_test_init);
 module_exit(driver_test_exit);
