@@ -108,11 +108,6 @@ struct device *driver_class_device;
 static int driver_test_init(void)
 {
 	int irq_num1 = 0;
-    /*
-	 *int irq_num2 = 0;
-	 *int irq_num3 = 0;
-	 *int irq_num4 = 0;
-     */
 	int data_t = 100;
 	int ret = -1;
 
@@ -142,38 +137,10 @@ static int driver_test_init(void)
 	irq_num1 = gpio_to_irq(EXYNOS4_GPX3(2));
 	printk("Init: irq_num1 = %d\n", irq_num1);
 
-/*
- *    irq_num2 = gpio_to_irq(EXYNOS4_GPX3(3));
- *    printk("Init: irq_num2 = %d\n", irq_num2);
- *
- *    irq_num3 = gpio_to_irq(EXYNOS4_GPX3(4));
- *    printk("Init: irq_num3 = %d\n", irq_num3);
- *
- *    irq_num4 = gpio_to_irq(EXYNOS4_GPX3(5));
- *    printk("Init: irq_num4 = %d\n", irq_num4);
- */
-
 	ret = request_irq(irq_num1, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key1", (void *)"key1");
 	if (ret) {
 		printk("Init: request_irq irq_num1 failed\n");
 	}
-	
-    /*
-	 *ret = request_irq(irq_num2, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key2", (void *)"key2");
-	 *if (ret) {
-	 *    printk("Init: request_irq irq_num2 failed\n");
-	 *}
-	 *
-	 *ret = request_irq(irq_num3, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key3", (void *)"key3");
-	 *if (ret) {
-	 *    printk("Init: request_irq irq_num3 failed\n");
-	 *}
-	 *
-	 *ret = request_irq(irq_num4, button_irq, IRQF_TRIGGER_FALLING, "tiny4412_key4", (void *)"key4");
-	 *if (ret) {
-	 *    printk("Init: request_irq irq_num4 failed\n");
-	 *}
-     */
 	
 	return 0;
 /*
@@ -189,36 +156,15 @@ static int driver_test_init(void)
 static void driver_test_exit(void)
 {
 	int irq_num1 = 0;
-    /*
-	 *int irq_num2 = 0;
-	 *int irq_num3 = 0;
-	 *int irq_num4 = 0;
-     */
 
 	printk("Goodbye, test over!\n");
 
 	irq_num1 = gpio_to_irq(EXYNOS4_GPX3(2));
 	printk("Exit: irq_num1 = %d\n", irq_num1);
 
-/*
- *    irq_num2 = gpio_to_irq(EXYNOS4_GPX3(3));
- *    printk("Init: irq_num2 = %d\n", irq_num2);
- *
- *    irq_num3 = gpio_to_irq(EXYNOS4_GPX3(4));
- *    printk("Init: irq_num3 = %d\n", irq_num3);
- *
- *    irq_num4 = gpio_to_irq(EXYNOS4_GPX3(5));
- *    printk("Init: irq_num4 = %d\n", irq_num4);
- */
-
  	destroy_workqueue(mywork);
 
 	free_irq(irq_num1, (void *)"key1");
-    /*
-	 *free_irq(irq_num2, (void *)"key2");
-	 *free_irq(irq_num3, (void *)"key3");
-	 *free_irq(irq_num4, (void *)"key4");
-     */
 
     /*
 	 *device_destroy(driver_class, MKDEV(major, 0));

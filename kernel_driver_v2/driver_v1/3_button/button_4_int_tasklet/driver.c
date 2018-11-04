@@ -26,7 +26,6 @@ static void task_function(unsigned long data)
 	}
 }
 
-
 static irqreturn_t button_irq(int irq, void *dev_id)
 {
 	printk("Driver: button interrupt, irq: %d\n", irq);
@@ -41,7 +40,6 @@ static irqreturn_t button_irq(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
 
 long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
