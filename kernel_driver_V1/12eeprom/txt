@@ -1,0 +1,12 @@
+
+eeprom
+
+24AA025E48
+	2Kbit = 256Bytes
+	page size 16-Byte
+
+slave address: 0x50
+i2c channel0
+	Xi2c0SCL	GPD1_1
+	Xi2c0SDA	GPD1_0
+

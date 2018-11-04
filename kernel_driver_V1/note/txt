@@ -1,0 +1,10 @@
+
+cdev			字符设备
+block_device	块设备
+net_device		网络设备	socket
+
+
+
+
+
+
