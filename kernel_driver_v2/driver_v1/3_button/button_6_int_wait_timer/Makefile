@@ -1,12 +1,8 @@
 obj-m += driver.o
 
-#KERNEL_DIR := /lib/modules/$(shell uname -r)/build
-#KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
 KERNEL_DIR := /home/$(USER)/kernel/linux-3.5
-#KERNEL_DIR := /home/kevin/kernel/linux-3.5
-#ROOTFS	:= /home/$(USER)/nfsroot
 ROOTFS	:= /nfs_mini
-TARGET_DIR := /nfs_mini/mcy
+TARGET_DIR := $(ROOTFS)/mcy
 
 #CROSS_COMPILE=arm-linux-
 #CC=$(CROSS_COMPILE)gcc
@@ -16,7 +12,6 @@ TARGET_DIR := /nfs_mini/mcy
 all:
 	make -C $(KERNEL_DIR) M=`pwd` modules
 	arm-linux-gcc app.c -o app
-	#arm-linux-gcc -Wl,-dynamic-linker=/system/lib/ld-linux.so.3 app.c -o app
 	chmod 775 *.ko
 	
 
@@ -36,7 +31,7 @@ in:
 #sudo cp app /nfs_mini/mcy -rf
 
 install:
-	#make -C $(KERNEL_DIR) M=`pwd` modules_install INSTALL_MOD_PATH=$(ROOTFS) 
+	@#make -C $(KERNEL_DIR) M=`pwd` modules_install INSTALL_MOD_PATH=$(ROOTFS) 
 	sudo cp app *.ko $(TARGET_DIR) -rf
 	
 

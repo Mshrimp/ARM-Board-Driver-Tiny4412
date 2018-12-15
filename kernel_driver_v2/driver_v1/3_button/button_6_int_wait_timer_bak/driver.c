@@ -17,8 +17,7 @@
 #define	DRV_ERROR(fmt, arg...)		\
 			printk("Driver error: "fmt"(function: %s, line: %d)\n", ##arg, __func__, __LINE__);
 
-#define DEV_NAME	"key_driver"
-#define	BUTTON_DELAY_MS				50
+#define DEV_NAME	"test_driver"
 
 typedef struct button_pin {
 	unsigned long gpio;
@@ -29,7 +28,6 @@ typedef struct button_irq {
 	int irq_num;
 	unsigned long flag;
 	char *name;
-	struct timer_list timer;
 } button_irq_t;
 
 static button_t button_desc[] = {
@@ -46,6 +44,7 @@ static button_irq_t button_irq[] = {
 	{0, IRQF_TRIGGER_FALLING, "Key4"},
 };
 
+static struct timer_list button_timer;
 static wait_queue_head_t button_wait_queue;
 
 /*
@@ -55,12 +54,18 @@ static wait_queue_head_t button_wait_queue;
 static unsigned long key_val;
 static volatile int ev_press = 0;
 
+#define	BUTTON_EXPIRES				(HZ / 20)
+
+/////////////////////////////////////////////////////////////////////裸板驱动
+
+
 ////////////////////////////////////////////////////////////////////////////字符设备框架
-static void button_timer_handler(unsigned long data)
+
+static void timer_handler(unsigned long data)
 {
 	button_t *button_desc = (button_t *)data;
 	unsigned long pin_val;
-	DRV_DEBUG("Driver: button timer handler\n");
+	printk("timer handler\n");
 
 	if (!button_desc) {
 		return;
@@ -81,24 +86,33 @@ static void button_timer_handler(unsigned long data)
 
 static irqreturn_t button_irq_handler(int irq, void *dev_id)
 {
-	button_irq_t *button_irq = (button_irq_t *)dev_id;
-	DRV_DEBUG("Driver: button interrupt, irq: %d\n", irq);
+	//button_t *button_desc = (button_t *)dev_id;
+	printk("Driver: button interrupt, irq: %d\n", irq);
 
-	mod_timer(&button_irq->timer, jiffies + msecs_to_jiffies(BUTTON_DELAY_MS));
+	button_timer.data = (unsigned long)dev_id;
+	mod_timer(&button_timer, jiffies + BUTTON_EXPIRES);
 
 	return IRQ_HANDLED;
 }
 
+
+long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	printk("Driver: test ioctl!\n");
+
+	return 0;
+}
+
 ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
-	DRV_DEBUG("Driver: test write!\n");
+	printk("Driver: test write!\n");
 	return size;
 }
 
 ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
 {
 	int ret = -1;
-	DRV_DEBUG("Driver: test read!\n");
+	printk("Driver: test read!\n");
 	if (size != 1) {
 		return -EINVAL;
 	}
@@ -125,40 +139,31 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 {
 	int i = 0;
 	int ret = 0;
-	DRV_DEBUG("Driver: test open!\n");
+	printk("Driver: test open!\n");
 
 	for (i = 0; i < ARRAY_SIZE(button_desc); i++) {
-		if (!button_desc[i].gpio) {
-			continue;
-		}
-
-		setup_timer(&button_irq[i].timer, button_timer_handler, (unsigned long)&button_desc[i]);
-
 		button_irq[i].irq_num = gpio_to_irq(button_desc[i].gpio);
 		DRV_DEBUG("irq[%d] = %d", i, button_irq[i].irq_num);
 
-		ret = request_irq(button_irq[i].irq_num, button_irq_handler, button_irq[i].flag, button_irq[i].name, &button_irq[i]);
+		ret = request_irq(button_irq[i].irq_num, button_irq_handler, button_irq[i].flag, button_irq[i].name, &button_desc[i]);
 		if (ret) {
 			DRV_ERROR("request_irq irq[%d] failed, ret = %d", i, ret);
 			break;
 		}
-
 	}
 	if (ret) {
-		--i;
-		for (; i >= 0; i--) {
-			if (!button_desc[i].gpio) {
-				continue;
-			}
-			free_irq(button_irq[i].irq_num, (void *)&button_desc[i]);
-			del_timer_sync(&button_irq[i].timer);
+		for (--i; i >= 0; i--) {
+			free_irq(button_irq[i].irq_num, &button_desc[i]);
 		}
 
 		return -EBUSY;
 	}
 
+	init_timer(&button_timer);
+	button_timer.function = timer_handler;
+	add_timer(&button_timer);
+
 	init_waitqueue_head(&button_wait_queue);
-	ev_press = 1;
 
 	return 0;
 }
@@ -166,15 +171,12 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 int driver_test_close (struct inode *inodep, struct file *filp)
 {
 	int i = 0;
-	DRV_DEBUG("Driver: test close!\n");
+	printk("Driver: test close!\n");
+
+	del_timer_sync(&button_timer);
 
 	for (i = 0; i < ARRAY_SIZE(button_desc); i++) {
-		if (!button_desc[i].gpio) {
-			continue;
-		}
-		free_irq(button_irq[i].irq_num, (void *)&button_desc[i]);
-
-		del_timer_sync(&button_irq[i].timer);
+		free_irq(button_irq[i].irq_num, &button_desc[i]);
 	}
 
 	return 0;
@@ -187,6 +189,7 @@ struct file_operations fops = {
 	.release = driver_test_close,
 	.read = driver_test_read,
 	.write = driver_test_write,
+	.unlocked_ioctl = driver_test_ioctl,
 };
 
 int major = 0;
@@ -195,7 +198,7 @@ struct device *driver_class_device;
 
 static int driver_test_init(void)
 {
-	DRV_DEBUG("Hello, driver chrdev register test begin!\n");
+	printk("Hello, driver chrdev register test begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
 	if (major < 0) {
@@ -215,7 +218,7 @@ static int driver_test_init(void)
 		goto ERR_class_device_create;
 	}
 
-	DRV_DEBUG("major = %d\n", major);
+	printk("major = %d\n", major);
 
 	return 0;
 ERR_class_device_create:
