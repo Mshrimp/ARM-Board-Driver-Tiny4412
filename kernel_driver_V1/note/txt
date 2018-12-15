@@ -4,7 +4,32 @@ block_device	块设备
 net_device		网络设备	socket
 
 
+cat /proc/devices
+查看设备
+————
+
+
+mknod /dev/test/mydev c 250 1
+手动创建节点
+
+inode	每个文件对应一个inode    唯一
+file	每次打开都对应一个file   不唯一
+
+
+在内核函数中不要分配太大的局部变量.
+
+
+// 修改调度策略，提高进程优先级
+#include <sched.h>
+struct sched_param param;
+param.sched_priority = sched_get_priority_max();
+sched_setscheduler(0, SCHED_FIFO, );
 
 
 
+使用硬件设备之前要记住，先打开时钟
+#include <linux/clk.h>
+clk = clk_get(NULL, "watchdog");
+clk_enable(clk);
+clk_disable(clk);
 
