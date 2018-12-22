@@ -17,5 +17,15 @@
 
 #define	LED_TOTLE			4
 
+
+#define drv_info(fmt, args...)      \
+			printk("Info Driver: " fmt "(function: %s, line: %d)\n", ##args, __func__, __LINE__)
+
+#define drv_debug(fmt, args...)     \
+			printk("Debug Driver: " fmt "(function: %s, line: %d)\n", ##args, __func__, __LINE__)
+
+#define drv_error(fmt, args...)     \
+			printk("Error Driver: " fmt "(function: %s, line: %d)\n", ##args, __func__, __LINE__)
+
 #endif
 

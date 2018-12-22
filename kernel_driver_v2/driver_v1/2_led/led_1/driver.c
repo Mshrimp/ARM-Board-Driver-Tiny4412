@@ -3,8 +3,8 @@
 #include <linux/device.h>
 #include <linux/uaccess.h>
 #include <asm/io.h>
-#include "common.h"
 
+#include "common.h"
 #include "led.h"
 
 #define DEV_NAME	"led_driver"
@@ -18,11 +18,13 @@ ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size
 	int val = 0;
 	int ret = 0;
 
-	printk("Driver: led write!\n");
-	printk("Driver: buf = %d, size = %d\n", *(int *)buf, size);
+	drv_info("Driver: led write!\n");
+	drv_info("Driver: buf = %d, size = %d\n", *(int *)buf, size);
+
 	ret = copy_from_user((void *)&val, buf, size);
 	ERRP_K(ret != 0, "Driver", "copy_from_user", return -1);
-	printk("Driver: val = %d, ret = %d\n", val, ret);
+
+	drv_info("Driver: val = %d, ret = %d\n", val, ret);
 
 	if (val == 0) {
 		*led_dat_p &= ~0xF;
@@ -35,19 +37,29 @@ ssize_t driver_led_write (struct file *filp, const char __user *buf, size_t size
 
 ssize_t driver_led_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
 {
-	printk("Driver: led read!\n");
+	drv_info("Driver: led read!\n");
+
 	return size;
+}
+
+long driver_led_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+	drv_info("Driver: led ioctl!\n");
+
+	return 0;
 }
 
 int driver_led_open (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: led open!\n");
+	drv_info("Driver: led open!\n");
 
-	printk("Driver: led config\n");
+	drv_info("Driver: led config\n");
+
 	*led_con_p &= ~0xFFFF;
 	*led_con_p |= 0x1111;
 
-	printk("Driver: led off\n");
+	drv_info("Driver: led off\n");
+
 	*led_dat_p |= 0xF;
 
 	return 0;
@@ -55,7 +67,8 @@ int driver_led_open (struct inode *inodep, struct file *filp)
 
 int driver_led_close (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: led close!\n");
+	drv_info("Driver: led close!\n");
+
 	return 0;
 }
 
@@ -69,13 +82,13 @@ struct file_operations fops = {
 	.unlocked_ioctl = driver_led_ioctl,
 };
 
-int major = 0;
-struct class *driver_class;
-struct device *driver_class_device;
+static int major = 0;
+static struct class *driver_class;
+static struct device *driver_class_device;
 
 static int driver_led_init(void)
 {
-	printk("Hello, driver chrdev register led begin!\n");
+	drv_info("Hello, driver chrdev register led begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
@@ -86,7 +99,7 @@ static int driver_led_init(void)
 	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "led_device");
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
-	printk("major = %d\n", major);
+	drv_info("major = %d\n", major);
 	
 	led_con_p = (volatile unsigned long *)ioremap(LED_CON_ADDR, 16);
 	ERRP_K(NULL == led_con_p, "Driver", "led_con_p ioremap", goto ERR_ioremap);
@@ -105,12 +118,12 @@ ERR_dev_register:
 
 static void driver_led_exit(void)
 {
-	printk("Goodbye, led over!\n");
+	drv_info("Goodbye, led over!\n");
 
 	iounmap(led_con_p);
+	unregister_chrdev(major, DEV_NAME);
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);
-	unregister_chrdev(major, DEV_NAME);
 }
 
 module_init(driver_led_init);

@@ -30,33 +30,33 @@ static int led_gpios[] = {
 
 long driver_test_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
-	printk("Driver: test ioctl!\n");
+	drv_info("Driver: test ioctl!\n");
 
 	return 0;
 }
 
 ssize_t driver_test_write (struct file *filp, const char __user *buf, size_t size, loff_t *offset)
 {
-	printk("Driver: test write!\n");
+	drv_info("Driver: test write!\n");
 	return size;
 }
 
 ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff_t *offset)
 {
-	printk("Driver: test read!\n");
+	drv_info("Driver: test read!\n");
 	return size;
 }
 
 int driver_test_open (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: test open!\n");
+	drv_info("Driver: test open!\n");
 
 	return 0;
 }
 
 int driver_test_close (struct inode *inodep, struct file *filp)
 {
-	printk("Driver: test close!\n");
+	drv_info("Driver: test close!\n");
 	return 0;
 }
 
@@ -79,7 +79,7 @@ static int driver_test_init(void)
 	int i = 0;
 	int ret = -1;
 
-	printk("Hello, driver chrdev register test begin!\n");
+	drv_info("Hello, driver chrdev register test begin!\n");
 
 	major = register_chrdev(major, DEV_NAME, &fops);
 	ERRP_K(major < 0, "Driver", "register_chrdev", goto ERR_dev_register);
@@ -90,12 +90,12 @@ static int driver_test_init(void)
 	driver_class_device = device_create(driver_class, NULL, MKDEV(major, 0), NULL, "driver_class_device");
 	ERRP_K(driver_class_device == NULL, "Driver", "class_device_create", goto ERR_class_device_create);
 
-	printk("major = %d\n", major);
+	drv_info("major = %d\n", major);
 	
 	for (i = 0; i < LED_NUM; i++) {
 		ret = gpio_request(led_gpios[i], "led");
 		if (ret) {
-			printk("%s: gpio_request gpio[%d] failed, ret = %d\n", __func__, i, ret);
+			drv_info("%s: gpio_request gpio[%d] failed, ret = %d\n", __func__, i, ret);
 		}
 	}
 
@@ -114,7 +114,7 @@ ERR_dev_register:
 static void driver_test_exit(void)
 {
 	int i = 0;
-	printk("Goodbye, test over!\n");
+	drv_info("Goodbye, test over!\n");
 
 	for (i = 0; i < LED_NUM; i++) {
 		gpio_free(led_gpios[i]);

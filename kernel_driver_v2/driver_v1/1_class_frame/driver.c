@@ -52,9 +52,9 @@ struct file_operations fops = {
 	.unlocked_ioctl = driver_test_ioctl,
 };
 
-int major = 0;
-struct class *driver_class;
-struct device *driver_class_device;
+static int major = 0;
+static struct class *driver_class;
+static struct device *driver_class_device;
 
 static int driver_test_init(void)
 {
@@ -83,9 +83,9 @@ ERR_dev_register:
 static void driver_test_exit(void)
 {
 	printk("Goodbye, test over!\n");
+	unregister_chrdev(major, DEV_NAME);
 	class_destroy(driver_class);
 	device_destroy(driver_class, MKDEV(major, 0));
-	unregister_chrdev(major, DEV_NAME);
 }
 
 

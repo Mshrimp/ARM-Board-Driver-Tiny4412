@@ -99,10 +99,10 @@ static void driver_test_exit(void)
 	printk("Goodbye, test over!\n");
 
 	iounmap(led_con_p);
+	unregister_chrdev(major, DEV_NAME);
 	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);
-	unregister_chrdev(major, DEV_NAME);
 }
 
 
