@@ -119,10 +119,10 @@ static void driver_test_exit(void)
 	for (i = 0; i < LED_NUM; i++) {
 		gpio_free(led_gpios[i]);
 	}
+	unregister_chrdev(major, DEV_NAME);
 	//device_unregister(driver_class_device);
 	device_destroy(driver_class, MKDEV(major, 0));
 	class_destroy(driver_class);
-	unregister_chrdev(major, DEV_NAME);
 }
 
 
