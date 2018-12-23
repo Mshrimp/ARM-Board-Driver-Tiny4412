@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <linux/ioctl.h>
+#include <poll.h>
 
 #include "key.h"
 
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
 	unsigned long key_val = 0;
 	int ret = -1;
 	int i = 0;
+	struct pollfd fds[1] = { 0 };
 
 	if (argc != 2)
 	{
@@ -29,21 +31,31 @@ int main(int argc, char *argv[])
 		printf("App: open dev failed\n");
 		goto ERR1;
 	}
+
 	printf("App: open, fd = %d\n", fd);
+
+	fds[0].fd = fd;
+	fds[0].events = POLLIN;
 
 	while(1)
 	{
-		ret = read(fd, &key_val, sizeof(key_val));
-		if (ret < 0) {
-			printf("App: read dev file failed, ret = %d\n", ret);
-			goto ERR2;
-		}
-		//printf("App: key_val: 0x%X\n", key_val);
-
-		if (key_val & 0x80) {
-			printf("Button %d down\n", key_val & 0x0F);
+		ret = poll(fds, 1, 5000);
+		if (!ret) {
+			printf("App: dev poll timeout, ret = %d\n", ret);
 		} else {
-			printf("Button %d up\n", key_val & 0x0F);
+			ret = read(fd, &key_val, sizeof(key_val));
+			if (ret < 0) {
+				printf("App: read dev file failed, ret = %d\n", ret);
+				goto ERR2;
+			}
+
+			//printf("App: key_val: 0x%X\n", key_val);
+
+			if (key_val & 0x80) {
+				printf("Button %d down\n", key_val & 0x0F);
+			} else {
+				printf("Button %d up\n", key_val & 0x0F);
+			}
 		}
 	}
 	close(fd);

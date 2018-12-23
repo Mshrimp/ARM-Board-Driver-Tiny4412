@@ -9,6 +9,7 @@
 #include <linux/poll.h>
 #include <mach/gpio.h>
 #include <asm/io.h>
+#include <asm/signal.h>
 
 #include "key.h"
 
@@ -46,14 +47,9 @@ static button_irq_t button_irq[] = {
 };
 
 static struct timer_list button_timer;
-static wait_queue_head_t button_wait_queue;
-
-/*
- *static DECLEAR_WAIT_QUEUE_HEAD(button_wait_queue);
- */
+static struct fasync_struct *fs;
 
 static unsigned long key_val;
-static volatile int ev_press = 0;
 
 #define	BUTTON_EXPIRES				(HZ / 20)
 
@@ -86,9 +82,9 @@ static void timer_handler(unsigned long data)
 		key_val = button_desc->val;
 	}
 
-	ev_press = 1;
+	kill_fasync(&fs, SIGIO, POLL_IN);
 
-	wake_up_interruptible(&button_wait_queue);
+	return;
 }
 
 static irqreturn_t button_irq_handler(int irq, void *dev_id)
@@ -127,16 +123,6 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 		return -EINVAL;
 	}
 
-	if (filp->f_flags & O_NONBLOCK) {
-		if (!ev_press) {
-			return -EAGAIN;
-		}
-	} else {
-		wait_event_interruptible(button_wait_queue, ev_press);
-	}
-
-	ev_press = 0;
-
 	ret = copy_to_user(buf, &key_val, sizeof(key_val));
 	if (ret < 0) {
 		DRV_ERROR("copy_to_user failed, ret = %d", ret);
@@ -146,19 +132,11 @@ ssize_t driver_test_read (struct file *filp, char __user *buf, size_t size, loff
 	return 0;
 }
 
-unsigned int driver_test_poll(struct file *filp, struct poll_table_struct *pts)
+int driver_test_fasync(int fd, struct file *filp, int on)
 {
-	unsigned int mask = 0;
+	fasync_helper(fd, filp, on, &fs);
 
-	printk("Driver: test poll!\n");
-
-	poll_wait(filp, &button_wait_queue, pts);
-
-	if (ev_press) {
-		mask |= POLLIN | POLLRDNORM;
-	}
-
-	return mask;
+	return 0;
 }
 
 int driver_test_open (struct inode *inodep, struct file *filp)
@@ -198,9 +176,6 @@ int driver_test_open (struct inode *inodep, struct file *filp)
 	init_timer(&button_timer);
 	button_timer.function = timer_handler;
 	add_timer(&button_timer);
-	//mod_timer(&button_timer, jiffies);
-
-	init_waitqueue_head(&button_wait_queue);
 
 	return 0;
 }
@@ -232,7 +207,7 @@ struct file_operations fops = {
 	.release = driver_test_close,
 	.read = driver_test_read,
 	.write = driver_test_write,
-	.poll = driver_test_poll,
+	.fasync = driver_test_fasync,
 	.unlocked_ioctl = driver_test_ioctl,
 };
 
